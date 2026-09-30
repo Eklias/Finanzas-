@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load contable_tags %}
+
+{% block title %}Registrar Asiento — ContaSys{% endblock %}
+{% block nav_registrar %}active{% endblock %}
+{% block page_title %}Registrar Asiento Contable{% endblock %}
+{% block page_subtitle %}Ingrese los datos del asiento y sus movimientos (mín. 2 líneas){% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h3>✏️ Nuevo Asiento Contable</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" id="formAsiento" action="{% url 'registrar_asiento' %}">
+            {% csrf_token %}
+
+            <!-- Cabecera del asiento -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="id_fecha">📅 Fecha</label>
+                    <input type="date" name="fecha" id="id_fecha" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_descripcion">📝 Descripción (opcional)</label>
+                    <input type="text" name="descripcion" id="id_descripcion" class="form-control"
+                           placeholder="Ej: Registro de venta al contado...">
+                </div>
+            </div>
+
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+
+            <!-- Líneas de movimiento -->
+            <h4 style="margin-bottom: 12px; color: var(--primary); font-size: 0.95rem;">
+                📊 Movimientos del Asiento
+            </h4>
+
+            <div id="movimientos-container">
+                <!-- Las filas se generan dinámicamente con JavaScript -->
+            </div>
+
+            <div style="margin-top: 12px;">
+                <button type="button" onclick="agregarMovimiento()" class="btn btn-secondary btn-sm">
+                    ➕ Agregar Línea
+                </button>
+            </div>
+
+            <!-- Preview del balance -->
+            <div class="balance-preview" id="balancePreview">
+                <div class="balance-item">
+                    <span class="balance-label">Total Debe:</span>
+                    <span class="balance-value text-debe" id="totalDebe">S/ 0.00</span>
+                </div>
+                <div class="balance-item">
+                    <span class="balance-label">Total Haber:</span>
+                    <span class="balance-value text-haber" id="totalHaber">S/ 0.00</span>
+                </div>
+                <span class="balance-status" id="balanceStatus">—</span>
+            </div>
+
+            <input type="hidden" name="num_movimientos" id="numMovimientos" value="0">
+
+            <div style="margin-top: 24px; display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-success" id="btnGuardar">
+                    💾 Guardar Asiento
+                </button>
+                <a href="{% url 'index' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 24px;">
+    <div class="card-header">
+        <h3>📋 Asientos Ya Registrados</h3>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <table class="table" style="margin-bottom: 0;">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Descripción</th>
+                    <th># Movimientos</th>
+                    <th class="text-center" style="width: 180px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for asiento in asientos_registrados %}
+                <tr>
+                    <td>{{ asiento.fecha|date:"d/m/Y" }}</td>
+                    <td><strong>Asiento #{{ asiento.id }}</strong> - {{ asiento.descripcion|default:"Sin descripción" }}</td>
+                    <td>{{ asiento.movimientos.count }} líneas</td>
+                    <td class="text-center">
+                        <a href="{% url 'editar_asiento' asiento.id %}" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.85rem;">✏️ Editar</a>
+                        <a href="{% url 'eliminar_asiento' asiento.id %}" class="btn btn-danger btn-sm" style="padding: 4px 8px; font-size: 0.85rem;" onclick="return confirm('¿Eliminar este asiento permanentemente?');">🗑️ Eliminar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center" style="padding: 20px; color: #666;">No hay asientos registrados actualmente.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Datos de cuentas disponibles para los select
+    const CUENTAS = [
+        {% for cuenta in cuentas %}
+        { id: {{ cuenta.id }}, text: "{{ cuenta.codigo }} - {{ cuenta.nombre }}" },
+        {% endfor %}
+    ];
+
+    let contadorMovimientos = 0;
+
+    /**
+     * Agrega una nueva fila de movimiento al formulario.
+     * Cada fila tiene: Cuenta (select), Tipo (Debe/Haber), Monto y botón eliminar.
+     */
+    function agregarMovimiento() {
+        const container = document.getElementById('movimientos-container');
+        const idx = contadorMovimientos;
+
+        const row = document.createElement('div');
+        row.className = 'movimiento-row';
+        row.id = `mov-row-${idx}`;
+
+        let optionsCuentas = '<option value="">— Seleccionar cuenta —</option>';
+        CUENTAS.forEach(c => {
+            optionsCuentas += `<option value="${c.id}">${c.text}</option>`;
+        });
+
+        row.innerHTML = `
+            <div class="form-group">
+                ${idx === 0 ? '<label>Cuenta Contable</label>' : ''}
+                <select name="cuenta_${idx}" class="form-control" required>
+                    ${optionsCuentas}
+                </select>
+            </div>
+            <div class="form-group">
+                ${idx === 0 ? '<label>Tipo</label>' : ''}
+                <select name="tipo_${idx}" class="form-control" required onchange="actualizarBalance()">
+                    <option value="">— Tipo —</option>
+                    <option value="debe">Debe</option>
+                    <option value="haber">Haber</option>
+                </select>
+            </div>
+            <div class="form-group">
+                ${idx === 0 ? '<label>Monto (S/)</label>' : ''}
+                <input type="number" name="monto_${idx}" class="form-control"
+                       step="0.01" min="0.01" placeholder="0.00" required
+                       oninput="actualizarBalance()">
+            </div>
+            <button type="button" class="btn-remove" onclick="eliminarMovimiento(${idx})"
+                    title="Eliminar línea" ${idx < 2 ? 'style="visibility:hidden"' : ''}>
+                ✕
+            </button>
+        `;
+
+        container.appendChild(row);
+        contadorMovimientos++;
+        document.getElementById('numMovimientos').value = contadorMovimientos;
+        actualizarBalance();
+    }
+
+    /**
+     * Elimina una fila de movimiento y recalcula el balance.
+     */
+    function eliminarMovimiento(idx) {
+        const row = document.getElementById(`mov-row-${idx}`);
+        if (row) {
+            row.remove();
+            actualizarBalance();
+        }
+    }
+
+    /**
+     * Recalcula los totales de Debe y Haber en tiempo real
+     * y actualiza el indicador de estado del balance.
+     */
+    function actualizarBalance() {
+        let totalDebe = 0;
+        let totalHaber = 0;
+
+        const rows = document.querySelectorAll('.movimiento-row');
+        let validCount = 0;
+
+        rows.forEach((row, i) => {
+            const tipo = row.querySelector(`select[name^="tipo_"]`);
+            const monto = row.querySelector(`input[name^="monto_"]`);
+
+            if (tipo && monto && monto.value) {
+                const val = parseFloat(monto.value) || 0;
+                if (tipo.value === 'debe') totalDebe += val;
+                else if (tipo.value === 'haber') totalHaber += val;
+                validCount++;
+            }
+        });
+
+        // Renumerar campos para el POST
+        let idx = 0;
+        rows.forEach(row => {
+            const selects = row.querySelectorAll('select');
+            const input = row.querySelector('input[type="number"]');
+            if (selects[0]) selects[0].name = `cuenta_${idx}`;
+            if (selects[1]) selects[1].name = `tipo_${idx}`;
+            if (input) input.name = `monto_${idx}`;
+            idx++;
+        });
+        document.getElementById('numMovimientos').value = idx;
+
+        document.getElementById('totalDebe').textContent = `S/ ${totalDebe.toFixed(2)}`;
+        document.getElementById('totalHaber').textContent = `S/ ${totalHaber.toFixed(2)}`;
+
+        const status = document.getElementById('balanceStatus');
+        if (totalDebe === 0 && totalHaber === 0) {
+            status.textContent = '—';
+            status.className = 'balance-status';
+        } else if (Math.abs(totalDebe - totalHaber) < 0.005) {
+            status.textContent = '✅ Balanceado';
+            status.className = 'balance-status ok';
+        } else {
+            const diff = Math.abs(totalDebe - totalHaber).toFixed(2);
+            status.textContent = `❌ Diferencia: S/ ${diff}`;
+            status.className = 'balance-status error';
+        }
+    }
+
+    // Inicializar con 2 filas mínimas
+    agregarMovimiento();
+    agregarMovimiento();
+</script>
+{% endblock %}

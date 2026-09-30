@@ -1,0 +1,1 @@
+# App core - Sistema Contable

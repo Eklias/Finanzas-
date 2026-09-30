@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block page_title %}Centro de Exportación y Descargas{% endblock %}
+{% block page_subtitle %}Descarga de Reportes Financieros en PDF, Excel (.xlsx) y CSV{% endblock %}
+
+{% block nav_reporte %}active{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
+
+    <!-- ═══ FILA SUPERIOR: EXCEL MAESTRO Y PDF OFICIAL ═══ -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px;">
+        
+        <!-- TARJETA EXCEL COMPLETO -->
+        <div class="card" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 10px; border-top: 4px solid #217346;">
+            <div class="card-header" style="background: white; border-bottom: 1px solid #edf2f7; padding: 18px 20px;">
+                <h3 style="margin: 0; font-size: 1.15rem; color: #217346; display: flex; align-items: center; gap: 8px;">
+                    <span>📊</span> Libro Contable Maestro en Excel
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <p style="color: #4a5568; line-height: 1.5; margin-bottom: 12px; font-size: 0.95rem;">
+                        Descarga un archivo <strong>Excel (.xlsx)</strong> profesional con <strong>4 hojas de trabajo</strong> integradas y fórmulas contables:
+                    </p>
+                    <ul style="color: #2d3748; font-size: 0.9rem; padding-left: 18px; line-height: 1.7; margin-bottom: 20px;">
+                        <li>📑 <strong>Hoja 1:</strong> Libro Diario cronológico.</li>
+                        <li>📑 <strong>Hoja 2:</strong> Balance de Comprobación (Sumas y Saldos).</li>
+                        <li>📑 <strong>Hoja 3:</strong> Estado de Resultados (Utilidad Neta).</li>
+                        <li>📑 <strong>Hoja 4:</strong> Balance General (Activo = Pasivo + Patrimonio).</li>
+                    </ul>
+                </div>
+                <div style="text-align: center; margin-top: 10px;">
+                    <a href="{% url 'exportar_reporte' 'completo' 'excel' %}" class="btn" style="background: #217346; color: white; padding: 12px 24px; font-size: 15px; font-weight: 600; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(33, 115, 70, 0.3);">
+                        <span>📥</span> Descargar Excel Completo (.xlsx)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- TARJETA PDF CON CARÁTULA UNI -->
+        <div class="card" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 10px; border-top: 4px solid #1f3c88;">
+            <div class="card-header" style="background: white; border-bottom: 1px solid #edf2f7; padding: 18px 20px;">
+                <h3 style="margin: 0; font-size: 1.15rem; color: #1f3c88; display: flex; align-items: center; gap: 8px;">
+                    <span>📄</span> Reporte Oficial en PDF
+                </h3>
+            </div>
+            <div class="card-body" style="padding: 20px;">
+                <p style="color: #4a5568; line-height: 1.5; margin-bottom: 15px; font-size: 0.95rem;">
+                    Genera el informe formal con <strong>carátula y membrete de la UNI</strong> listo para imprimir o adjuntar en entregables de la práctica:
+                </p>
+                <form method="POST" action="{% url 'reporte_completo' %}">
+                    {% csrf_token %}
+                    <div class="form-group" style="margin-bottom: 15px;">
+                        <label style="font-weight: 600; font-size: 0.88rem; color: #2d3748; display: block; margin-bottom: 6px;">Nombre de la Empresa:</label>
+                        <input type="text" name="empresa" class="form-control" required value="Empresa Modelo UNI S.A.C." style="width: 100%; padding: 10px 12px; border: 1.5px solid #cbd5e0; border-radius: 6px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button type="submit" class="btn" style="background: #1f3c88; color: white; padding: 12px 24px; font-size: 15px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(31, 60, 136, 0.3);">
+                            <span>📥</span> Generar y Descargar PDF
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══ TABLA DE DESCARGAS INDIVIDUALES POR REPORTE ═══ -->
+    <div class="card" style="box-shadow: 0 4px 15px rgba(0,0,0,0.06); border-radius: 10px;">
+        <div class="card-header" style="background: white; border-bottom: 1px solid #edf2f7; padding: 18px 24px;">
+            <h3 style="margin: 0; font-size: 1.15rem; color: #2d3748;">📁 Descargas Individuales por Reporte</h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            <div class="table-container">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                            <th style="padding: 12px 20px; text-align: left; color: #475569; font-size: 0.9rem;">Reporte Contable</th>
+                            <th style="padding: 12px 20px; text-align: left; color: #475569; font-size: 0.9rem;">Descripción</th>
+                            <th style="padding: 12px 20px; text-align: center; color: #475569; font-size: 0.9rem;">Formato Excel</th>
+                            <th style="padding: 12px 20px; text-align: center; color: #475569; font-size: 0.9rem;">Formato CSV</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #edf2f7;">
+                            <td style="padding: 14px 20px; font-weight: 600; color: #1e293b;">📖 Libro Diario</td>
+                            <td style="padding: 14px 20px; color: #64748b; font-size: 0.9rem;">Todos los asientos cronológicos con Debe y Haber</td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'diario' 'excel' %}" class="btn btn-sm" style="background: #217346; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📊 .xlsx</a>
+                            </td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'diario' 'csv' %}" class="btn btn-sm" style="background: #475569; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📄 .csv</a>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #edf2f7;">
+                            <td style="padding: 14px 20px; font-weight: 600; color: #1e293b;">⚖️ Balance de Comprobación</td>
+                            <td style="padding: 14px 20px; color: #64748b; font-size: 0.9rem;">Hoja de trabajo con sumas de mayor y saldos</td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'balance-comprobacion' 'excel' %}" class="btn btn-sm" style="background: #217346; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📊 .xlsx</a>
+                            </td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'balance-comprobacion' 'csv' %}" class="btn btn-sm" style="background: #475569; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📄 .csv</a>
+                            </td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #edf2f7;">
+                            <td style="padding: 14px 20px; font-weight: 600; color: #1e293b;">📈 Estado de Resultados</td>
+                            <td style="padding: 14px 20px; color: #64748b; font-size: 0.9rem;">Ingresos, Costo de Ventas y Utilidad del Ejercicio</td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'estado-resultados' 'excel' %}" class="btn btn-sm" style="background: #217346; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📊 .xlsx</a>
+                            </td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'estado-resultados' 'csv' %}" class="btn btn-sm" style="background: #475569; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📄 .csv</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 14px 20px; font-weight: 600; color: #1e293b;">🏦 Balance General</td>
+                            <td style="padding: 14px 20px; color: #64748b; font-size: 0.9rem;">Estado de Situación: Activo = Pasivo + Patrimonio</td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'balance-general' 'excel' %}" class="btn btn-sm" style="background: #217346; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📊 .xlsx</a>
+                            </td>
+                            <td style="padding: 14px 20px; text-align: center;">
+                                <a href="{% url 'exportar_reporte' 'balance-general' 'csv' %}" class="btn btn-sm" style="background: #475569; color: white; padding: 6px 14px; font-weight: 600; border-radius: 6px; text-decoration: none;">📄 .csv</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

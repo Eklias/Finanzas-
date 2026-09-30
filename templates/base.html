@@ -1,0 +1,171 @@
+{% load static %}
+{% load contable_tags %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema Contable - Gestión de asientos contables y reportes financieros">
+    <title>{% block title %}Sistema Contable{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="layout">
+        <!-- ═══ SIDEBAR ═══ -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h1><span class="brand-icon">📊</span> ContaSys</h1>
+                <small>Sistema Contable v1.0</small>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">Principal</div>
+                <a href="{% url 'index' %}" class="nav-link {% block nav_index %}{% endblock %}">
+                    <span class="nav-icon">🏠</span> Inicio
+                </a>
+
+                <div class="nav-section">Operaciones</div>
+                <a href="{% url 'gestionar_cuentas' %}" class="nav-link {% block nav_cuentas %}{% endblock %}">
+                    <span class="nav-icon">📋</span> Plan de Cuentas
+                </a>
+                <a href="{% url 'registrar_asiento' %}" class="nav-link {% block nav_registrar %}{% endblock %}">
+                    <span class="nav-icon">✏️</span> Registrar Asiento
+                </a>
+
+                <div class="nav-section">Reportes</div>
+                <a href="{% url 'libro_diario' %}" class="nav-link {% block nav_diario %}{% endblock %}">
+                    <span class="nav-icon">📖</span> Libro Diario
+                </a>
+                <a href="{% url 'libro_mayor' %}" class="nav-link {% block nav_mayor %}{% endblock %}">
+                    <span class="nav-icon">📚</span> Libro Mayor
+                </a>
+                <a href="{% url 'balance_comprobacion' %}" class="nav-link {% block nav_balance_comp %}{% endblock %}">
+                    <span class="nav-icon">⚖️</span> Balance de Comprobación
+                </a>
+                <a href="{% url 'estado_resultados' %}" class="nav-link {% block nav_eerr %}{% endblock %}">
+                    <span class="nav-icon">📈</span> Estado de Resultados
+                </a>
+                <a href="{% url 'balance_general' %}" class="nav-link {% block nav_balance_gen %}{% endblock %}">
+                    <span class="nav-icon">🏦</span> Balance General
+                </a>
+
+                <div class="nav-section" style="margin-top: 20px;">Descargas</div>
+                <a href="{% url 'reporte_completo' %}" class="nav-link {% block nav_reporte %}{% endblock %}" style="background-color: #217346; color: white;">
+                    <span class="nav-icon">📥</span> Descargas (PDF / Excel / CSV)
+                </a>
+            </nav>
+        </aside>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-content">
+            <div class="page-header">
+                <div>
+                    <h2>{% block page_title %}Sistema Contable{% endblock %}</h2>
+                    <div class="header-subtitle">{% block page_subtitle %}{% endblock %}</div>
+                </div>
+                <div>
+                    {% block page_actions %}{% endblock %}
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Mensajes del sistema -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </div>
+
+            <div class="footer">
+                <p>© 2026 ContaSys — Sistema Contable | Desarrollado con Django & SQLite</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══ CHATBOT FLOTANTE ═══ -->
+    <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: sans-serif;">
+        <!-- Botón para abrir -->
+        <button id="chatbot-toggle" style="width: 60px; height: 60px; border-radius: 50%; background: #8e44ad; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 24px; transition: transform 0.3s;">
+            🤖
+        </button>
+
+        <!-- Ventana de Chat (Oculta por defecto) -->
+        <div id="chatbot-window" style="display: none; position: absolute; bottom: 80px; right: 0; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #eee;">
+            <div style="background: #8e44ad; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                <span>Asistente Contable "Conta"</span>
+                <button id="chatbot-close" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">×</button>
+            </div>
+            <div id="chatbot-messages" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+                <div style="background: #e1bee7; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%;">
+                    ¡Hola! Soy Conta. Puedo ayudarte con tus saldos, el PCGE o cualquier duda contable. ¿En qué te ayudo hoy?
+                </div>
+            </div>
+            <div style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px;">
+                <input type="text" id="chatbot-input" placeholder="Pregúntame algo..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none;">
+                <button id="chatbot-send" style="background: #8e44ad; color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer;">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const toggleBtn = document.getElementById('chatbot-toggle');
+        const chatWindow = document.getElementById('chatbot-window');
+        const closeBtn = document.getElementById('chatbot-close');
+        const sendBtn = document.getElementById('chatbot-send');
+        const input = document.getElementById('chatbot-input');
+        const messagesContainer = document.getElementById('chatbot-messages');
+
+        toggleBtn.onclick = () => {
+            chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+            toggleBtn.style.transform = chatWindow.style.display === 'flex' ? 'scale(0.8)' : 'scale(1)';
+        };
+
+        closeBtn.onclick = () => {
+            chatWindow.style.display = 'none';
+            toggleBtn.style.transform = 'scale(1)';
+        };
+
+        async function sendMessage() {
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Mensaje usuario
+            const userDiv = document.createElement('div');
+            userDiv.style = "background: #2980b9; color: white; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%;";
+            userDiv.textContent = text;
+            messagesContainer.appendChild(userDiv);
+            input.value = '';
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            // Cargando...
+            const botDiv = document.createElement('div');
+            botDiv.style = "background: #e1bee7; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%;";
+            botDiv.textContent = "Pensando...";
+            messagesContainer.appendChild(botDiv);
+
+            try {
+                const response = await fetch('/chatbot/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
+                    body: `message=${encodeURIComponent(text)}`
+                });
+                const data = await response.json();
+                botDiv.textContent = data.response || data.error;
+            } catch (e) {
+                botDiv.textContent = "Error de conexión.";
+            }
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        sendBtn.onclick = sendMessage;
+        input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

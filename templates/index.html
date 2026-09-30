@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load contable_tags %}
+
+{% block title %}Inicio — ContaSys{% endblock %}
+{% block nav_index %}active{% endblock %}
+{% block page_title %}Panel Principal{% endblock %}
+{% block page_subtitle %}Resumen general del sistema contable{% endblock %}
+
+{% block content %}
+<!-- ═══ ESTADÍSTICAS ═══ -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue">📋</div>
+        <div class="stat-info">
+            <h4>{{ total_cuentas }}</h4>
+            <p>Cuentas Contables</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green">📝</div>
+        <div class="stat-info">
+            <h4>{{ total_asientos }}</h4>
+            <p>Asientos Registrados</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple">🔢</div>
+        <div class="stat-info">
+            <h4>{{ total_movimientos }}</h4>
+            <p>Movimientos Totales</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon orange">💰</div>
+        <div class="stat-info">
+            <h4>{{ total_debe|formato_moneda }}</h4>
+            <p>Total Debe / Haber</p>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ ACCIONES RÁPIDAS ═══ -->
+<h3 style="margin-bottom: 16px; color: var(--primary); font-size: 1.05rem;">Acciones Rápidas</h3>
+<div class="actions-grid">
+    <a href="{% url 'gestionar_cuentas' %}" class="action-card">
+        <div class="action-icon">📋</div>
+        <h4>Plan de Cuentas</h4>
+        <p>Gestionar el catálogo de cuentas contables y su clasificación</p>
+    </a>
+    <a href="{% url 'registrar_asiento' %}" class="action-card">
+        <div class="action-icon">✏️</div>
+        <h4>Registrar Asiento</h4>
+        <p>Crear un nuevo asiento contable con sus movimientos al Debe y Haber</p>
+    </a>
+    <a href="{% url 'libro_diario' %}" class="action-card">
+        <div class="action-icon">📖</div>
+        <h4>Libro Diario</h4>
+        <p>Consultar todos los asientos registrados ordenados por fecha</p>
+    </a>
+    <a href="{% url 'libro_mayor' %}" class="action-card">
+        <div class="action-icon">📚</div>
+        <h4>Libro Mayor</h4>
+        <p>Ver los movimientos y saldos agrupados por cada cuenta contable</p>
+    </a>
+    <a href="{% url 'balance_comprobacion' %}" class="action-card">
+        <div class="action-icon">⚖️</div>
+        <h4>Balance de Comprobación</h4>
+        <p>Verificar que los totales de Debe y Haber estén cuadrados</p>
+    </a>
+    <a href="{% url 'estado_resultados' %}" class="action-card">
+        <div class="action-icon">📈</div>
+        <h4>Estado de Resultados</h4>
+        <p>Calcular la utilidad o pérdida del período</p>
+    </a>
+    <a href="{% url 'balance_general' %}" class="action-card">
+        <div class="action-icon">🏦</div>
+        <h4>Balance General</h4>
+        <p>Verificar la ecuación contable: Activo = Pasivo + Patrimonio</p>
+    </a>
+</div>
+
+<!-- ═══ ÚLTIMOS ASIENTOS ═══ -->
+{% if ultimos_asientos %}
+<div class="card" style="margin-top: 8px;">
+    <div class="card-header">
+        <h3>📝 Últimos Asientos Registrados</h3>
+        <a href="{% url 'libro_diario' %}" class="btn btn-sm btn-secondary">Ver todos →</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Fecha</th>
+                        <th>Descripción</th>
+                        <th class="text-right">Debe</th>
+                        <th class="text-right">Haber</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asiento in ultimos_asientos %}
+                    <tr>
+                        <td><strong>#{{ asiento.id }}</strong></td>
+                        <td>{{ asiento.fecha|date:"d/m/Y" }}</td>
+                        <td>{{ asiento.descripcion|truncatewords:10 }}</td>
+                        <td class="text-right monto text-debe">{{ asiento.total_debe|formato_moneda }}</td>
+                        <td class="text-right monto text-haber">{{ asiento.total_haber|formato_moneda }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

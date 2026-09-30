@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+.venv/
+.venv*/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Base de datos local de SQLite (generalmente no se sube a producción)
+# db.sqlite3
+
+# Archivos de entorno y configuración local
+.env
+.env.local
+
+# Archivos estáticos recolectados (se generan en producción)
+staticfiles/
+
+
+# Archivos de SO
+.DS_Store
+Thumbs.db
