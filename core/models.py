@@ -24,15 +24,30 @@ class CuentaContable(models.Model):
         ('gasto', 'Gasto'),
     ]
 
-    # Subcategoría para clasificar cuentas en el Estado de Resultados
+    # Las categorías de EE.RR. existentes conservan su significado en los reportes.
     SUBCATEGORIA_CHOICES = [
         ('', 'General'),
+        ('activo_corriente', 'Activo corriente'),
+        ('existencias', 'Existencias'),
+        ('activo_no_corriente', 'Activo no corriente'),
+        ('pasivo', 'Pasivo'),
+        ('patrimonio', 'Patrimonio'),
+        ('gastos', 'Gastos'),
+        ('ingresos', 'Ingresos'),
         ('costo_ventas', 'Costo de Ventas'),
         ('gasto_operativo', 'Gasto Operativo'),
         ('gasto_financiero', 'Gasto Financiero'),
         ('otro_ingreso', 'Otro Ingreso'),
         ('otro_gasto', 'Otro Gasto'),
     ]
+
+    SUBCATEGORIAS_POR_TIPO = {
+        'activo': ['activo_corriente', 'existencias', 'activo_no_corriente'],
+        'pasivo': ['pasivo'],
+        'patrimonio': ['patrimonio'],
+        'gasto': ['gastos', 'costo_ventas', 'gasto_operativo', 'gasto_financiero', 'otro_gasto'],
+        'ingreso': ['ingresos', 'otro_ingreso'],
+    }
 
     codigo = models.CharField(max_length=20, unique=True, verbose_name='Código')
     nombre = models.CharField(max_length=200, verbose_name='Nombre')
@@ -42,7 +57,7 @@ class CuentaContable(models.Model):
         choices=SUBCATEGORIA_CHOICES,
         blank=True,
         default='',
-        verbose_name='Subcategoría (EE.RR.)'
+        verbose_name='Subcategoría'
     )
 
     class Meta:

@@ -88,83 +88,25 @@
     </div>
 
     <!-- ═══ CHATBOT FLOTANTE ═══ -->
-    <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; font-family: sans-serif;">
-        <!-- Botón para abrir -->
-        <button id="chatbot-toggle" style="width: 60px; height: 60px; border-radius: 50%; background: #8e44ad; color: white; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-size: 24px; transition: transform 0.3s;">
-            🤖
-        </button>
-
-        <!-- Ventana de Chat (Oculta por defecto) -->
-        <div id="chatbot-window" style="display: none; position: absolute; bottom: 80px; right: 0; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); flex-direction: column; overflow: hidden; border: 1px solid #eee;">
-            <div style="background: #8e44ad; color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+    <div id="chatbot-container" class="chatbot-container" data-url="{% url 'chatbot_api' %}">
+        <div hidden>{% csrf_token %}</div>
+        <button type="button" id="chatbot-toggle" class="chatbot-toggle" aria-label="Abrir asistente contable" aria-expanded="false" aria-controls="chatbot-window">🤖</button>
+        <section id="chatbot-window" class="chatbot-window" aria-label="Asistente contable" hidden>
+            <div class="chatbot-header">
                 <span>Asistente Contable "Conta"</span>
-                <button id="chatbot-close" style="background: none; border: none; color: white; cursor: pointer; font-size: 20px;">×</button>
+                <button type="button" id="chatbot-close" aria-label="Cerrar chat">×</button>
             </div>
-            <div id="chatbot-messages" style="flex: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
-                <div style="background: #e1bee7; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%;">
-                    ¡Hola! Soy Conta. Puedo ayudarte con tus saldos, el PCGE o cualquier duda contable. ¿En qué te ayudo hoy?
-                </div>
+            <div id="chatbot-messages" class="chatbot-messages" role="log" aria-live="polite" aria-relevant="additions text">
+                <div class="chatbot-message chatbot-message-bot">¡Hola! Soy Conta. Describe un hecho contable y te ayudaré a preparar un asiento para revisar.</div>
             </div>
-            <div style="padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px;">
-                <input type="text" id="chatbot-input" placeholder="Pregúntame algo..." style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none;">
-                <button id="chatbot-send" style="background: #8e44ad; color: white; border: none; padding: 10px 15px; border-radius: 50%; cursor: pointer;">➤</button>
-            </div>
-        </div>
+            <form id="chatbot-form" class="chatbot-input-row">
+                <label class="chatbot-sr-only" for="chatbot-input">Hecho contable</label>
+                <input type="text" id="chatbot-input" placeholder="Describe un hecho contable..." autocomplete="off" required>
+                <button type="submit" id="chatbot-send" class="btn btn-primary" aria-label="Enviar mensaje">➤</button>
+            </form>
+        </section>
     </div>
-
-    <script>
-        const toggleBtn = document.getElementById('chatbot-toggle');
-        const chatWindow = document.getElementById('chatbot-window');
-        const closeBtn = document.getElementById('chatbot-close');
-        const sendBtn = document.getElementById('chatbot-send');
-        const input = document.getElementById('chatbot-input');
-        const messagesContainer = document.getElementById('chatbot-messages');
-
-        toggleBtn.onclick = () => {
-            chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
-            toggleBtn.style.transform = chatWindow.style.display === 'flex' ? 'scale(0.8)' : 'scale(1)';
-        };
-
-        closeBtn.onclick = () => {
-            chatWindow.style.display = 'none';
-            toggleBtn.style.transform = 'scale(1)';
-        };
-
-        async function sendMessage() {
-            const text = input.value.trim();
-            if (!text) return;
-
-            // Mensaje usuario
-            const userDiv = document.createElement('div');
-            userDiv.style = "background: #2980b9; color: white; padding: 10px; border-radius: 10px; align-self: flex-end; max-width: 80%;";
-            userDiv.textContent = text;
-            messagesContainer.appendChild(userDiv);
-            input.value = '';
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-            // Cargando...
-            const botDiv = document.createElement('div');
-            botDiv.style = "background: #e1bee7; padding: 10px; border-radius: 10px; align-self: flex-start; max-width: 80%;";
-            botDiv.textContent = "Pensando...";
-            messagesContainer.appendChild(botDiv);
-
-            try {
-                const response = await fetch('/chatbot/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': '{{ csrf_token }}' },
-                    body: `message=${encodeURIComponent(text)}`
-                });
-                const data = await response.json();
-                botDiv.textContent = data.response || data.error;
-            } catch (e) {
-                botDiv.textContent = "Error de conexión.";
-            }
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
-
-        sendBtn.onclick = sendMessage;
-        input.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
-    </script>
+    <script src="{% static 'js/chatbot.js' %}" defer></script>
 
     {% block extra_js %}{% endblock %}
 </body>

@@ -19,6 +19,19 @@ SECRET_KEY = 'django-insecure-sistema-contable-dev-key-cambiar-en-produccion'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# Diagnóstico temporal: GROQ_DIAGNOSTICS=0 desactiva el detalle del proveedor.
+GROQ_DIAGNOSTICS = os.getenv('GROQ_DIAGNOSTICS', '1' if DEBUG else '0') == '1'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'groq_console': {'class': 'logging.StreamHandler'}},
+    'loggers': {
+        'core.services.chatbot': {
+            'handlers': ['groq_console'], 'level': 'ERROR', 'propagate': False,
+        },
+    },
+}
+
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -99,4 +112,4 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
 # Default primary key field type
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

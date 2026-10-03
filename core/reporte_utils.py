@@ -62,7 +62,12 @@ def get_reporte_context():
     ctx['er_total_gastos_operativos'] = total_por_filtro('gasto', exclude_subcat=['costo_ventas', 'gasto_financiero', 'otro_gasto'])
     ctx['er_utilidad_operativa'] = ctx['er_utilidad_bruta'] - ctx['er_total_gastos_operativos']
     ctx['er_total_gastos_financieros'] = total_por_filtro('gasto', subcat='gasto_financiero')
-    ctx['er_utilidad_antes_impuesto'] = ctx['er_utilidad_operativa'] - ctx['er_total_gastos_financieros']
+    ctx['er_total_otros_ingresos'] = total_por_filtro('ingreso', subcat='otro_ingreso')
+    ctx['er_total_otros_gastos'] = total_por_filtro('gasto', subcat='otro_gasto')
+    ctx['er_utilidad_antes_impuesto'] = (
+        ctx['er_utilidad_operativa'] - ctx['er_total_gastos_financieros']
+        + ctx['er_total_otros_ingresos'] - ctx['er_total_otros_gastos']
+    )
     ctx['er_impuesto'] = (ctx['er_utilidad_antes_impuesto'] * Decimal('0.30')).quantize(Decimal('0.01')) if ctx['er_utilidad_antes_impuesto'] > 0 else Decimal('0')
     ctx['er_utilidad_neta'] = ctx['er_utilidad_antes_impuesto'] - ctx['er_impuesto']
 
@@ -80,12 +85,12 @@ def get_reporte_context():
                 bg_activos.append({'cuenta': cuenta, 'saldo': saldo})
                 total_activos += saldo
         elif cuenta.tipo == 'pasivo':
-            saldo_acreedor = abs(saldo)
+            saldo_acreedor = -saldo
             if saldo_acreedor != 0:
                 bg_pasivos.append({'cuenta': cuenta, 'saldo': saldo_acreedor})
                 total_pasivos += saldo_acreedor
         elif cuenta.tipo == 'patrimonio':
-            saldo_acreedor = abs(saldo)
+            saldo_acreedor = -saldo
             if saldo_acreedor != 0:
                 bg_patrimonio.append({'cuenta': cuenta, 'saldo': saldo_acreedor})
                 total_patrimonio += saldo_acreedor
@@ -110,8 +115,8 @@ def get_reporte_context():
             mayor_datos.append({
                 'cuenta': cuenta, 'movimientos': movs,
                 'total_debe': t['debe'], 'total_haber': t['haber'],
-                'saldo_final': t['debe'] - t['haber'] if cuenta.tipo == 'activo' else t['haber'] - t['debe']
+                'saldo_final': t['debe'] - t['haber'] if cuenta.naturaleza_deudora else t['haber'] - t['debe']
             })
     ctx['mayor_datos'] = mayor_datos
 
-    return ctx
+    return ctx
