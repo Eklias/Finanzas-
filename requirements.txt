@@ -7,3 +7,5 @@ psycopg2-binary>=2.9.9
 dj-database-url>=2.1.0
 requests>=2.31.0
 openpyxl>=3.1.5
+Pillow>=10.0.0
+pytesseract>=0.3.10

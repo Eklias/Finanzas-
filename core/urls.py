@@ -27,4 +27,5 @@ urlpatterns = [
     path('reporte-completo/', views.reporte_completo, name='reporte_completo'),
     path('exportar/<str:reporte>/<str:formato>/', views.exportar_reporte, name='exportar_reporte'),
     path('chatbot/', views.chatbot_api, name='chatbot_api'),
+    path('procesar_imagen_asiento/', views.procesar_imagen_asiento, name='procesar_imagen_asiento'),
 ]

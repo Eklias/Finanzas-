@@ -7,7 +7,12 @@ const template = fs.readFileSync(path.join(__dirname, '../templates/registrar_as
 const source = template.match(/<script>([\s\S]*?)<\/script>/)[1];
 
 class Element {
-    constructor(tag = 'div') { this.tag = tag; this.children = []; this.className = ''; }
+    constructor(tag = 'div') {
+        this.tag = tag; this.children = []; this.className = '';
+        this.style = {}; this.listeners = {};
+    }
+    addEventListener(event, callback) { this.listeners[event] = callback; }
+    replaceChildren() { this.children = []; }
     set value(value) { this.currentValue = String(value); }
     get value() { return this.currentValue || ''; }
     appendChild(child) { this.children.push(child); child.parent = this; }
@@ -26,12 +31,13 @@ class Element {
     querySelectorAll(tag) { return this.children.filter(c => c.tag === tag); }
 }
 
-function setup(movimientos) {
+function setup(movimientos, ocrResponse) {
     const ids = ['movimientos-container', 'numMovimientos', 'totalDebe', 'totalHaber',
                  'balanceStatus', 'cuentas-data', 'asiento-inicial'];
     const nodes = Object.fromEntries(ids.map(id => [id, new Element()]));
     nodes['cuentas-data'].textContent = JSON.stringify([
-        {id: 11, text: '10 - Caja'}, {id: 20, text: '50 - Capital'},
+        {id: 11, codigo: '10', nombre: 'Caja', text: '10 - Caja'},
+        {id: 20, codigo: '50', nombre: 'Capital', text: '50 - Capital'},
         {id: 30, text: '<script>alert(1)</script>'},
     ]);
     nodes['asiento-inicial'].textContent = JSON.stringify({descripcion: 'Aporte', movimientos});
@@ -44,6 +50,18 @@ function setup(movimientos) {
     };
     vm.createContext(context);
     vm.runInContext(source, context);
+    if (ocrResponse) {
+        for (const id of ['ocr-panel', 'btnProcesarOcr', 'inputImagenOcr', 'inputTextoManual',
+            'contenedorModoTexto', 'btnToggleModoTexto', 'ocrFeedback', 'ocrLoading',
+            'selectorOperaciones', 'listaOperacionesChips', 'ocrResultado', 'ocrTextoDetectado',
+            'id_fecha', 'id_descripcion']) nodes[id] = new Element();
+        nodes['ocr-panel'].dataset = {url: '/procesar_imagen_asiento/'};
+        nodes.inputImagenOcr.files = [{}];
+        context.document.querySelector = () => ({value: 'csrf-token'});
+        context.FormData = class { append() {} };
+        context.fetch = async () => ({ok: true, json: async () => ocrResponse});
+        vm.runInContext(fs.readFileSync(path.join(__dirname, '../static/js/asiento_ocr.js'), 'utf8'), context);
+    }
     return {nodes, context, rows: () => nodes['movimientos-container'].children};
 }
 
@@ -98,4 +116,37 @@ test('nombres de cuentas con HTML sólo se insertan como texto de opciones', () 
     assert.equal(options[2].textContent, '<script>alert(1)</script>');
     assert.equal(options[2].tag, 'option');
     assert.equal(options[2].children.length, 0);
+});
+
+test('Cargar OCR usa los IDs de las opciones reales y conserva balance y revisión manual', async () => {
+    const app = setup([], {operaciones: [{fecha: '2020-07-08', glosa: 'Creación de empresa', movimientos: [
+        {codigo_cuenta: 10, nombre_cuenta: 'Caja', tipo: 'debe', monto: 100000},
+        {codigo_cuenta: ' 50 ', nombre_cuenta: 'Capital', tipo: 'haber', monto: 100000},
+    ]}]});
+    await app.nodes.btnProcesarOcr.listeners.click();
+    assert.equal(app.rows()[0].children[0].value, '');
+    app.nodes.listaOperacionesChips.children[0].listeners.click();
+    const selects = app.rows().map(row => row.children[0]);
+    assert.deepEqual(selects.map(select => select.value), ['11', '20']);
+    selects.forEach(select => assert.ok(select.children.some(option => option.value === select.value)));
+    assert.equal(app.nodes.id_fecha.value, '2020-07-08');
+    assert.equal(app.nodes.id_descripcion.value, 'Creación de empresa');
+    assert.equal(app.nodes.totalDebe.textContent, 'S/ 100000.00');
+    assert.equal(app.nodes.totalHaber.textContent, 'S/ 100000.00');
+    assert.equal(app.nodes.numMovimientos.value, '2');
+    assert.equal(app.nodes.ocrFeedback.className, 'alert alert-success');
+    selects[0].value = 20;
+    assert.equal(selects[0].value, '20');
+});
+
+test('Cargar OCR sin coincidencia exacta deja el select real vacío y conserva el monto', async () => {
+    const app = setup([], {operaciones: [{movimientos: [
+        {codigo_cuenta: '101', nombre_cuenta: 'Caja', tipo: 'debe', monto: 30},
+        {codigo_cuenta: null, pendiente_revision: true, tipo: 'haber', monto: 30},
+    ]}]});
+    await app.nodes.btnProcesarOcr.listeners.click();
+    app.nodes.listaOperacionesChips.children[0].listeners.click();
+    assert.deepEqual(app.rows().map(row => row.children[0].value), ['', '']);
+    assert.deepEqual(app.rows().map(row => row.children[2].value), ['30', '30']);
+    assert.equal(app.nodes.ocrFeedback.className, 'alert alert-error');
 });
