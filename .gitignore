@@ -24,6 +24,13 @@ venv.bak/
 staticfiles/
 
 
+# IDEs y Editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
 # Archivos de SO
 .DS_Store
 Thumbs.db
+

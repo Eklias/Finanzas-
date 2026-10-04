@@ -28,4 +28,8 @@ urlpatterns = [
     path('exportar/<str:reporte>/<str:formato>/', views.exportar_reporte, name='exportar_reporte'),
     path('chatbot/', views.chatbot_api, name='chatbot_api'),
     path('procesar_imagen_asiento/', views.procesar_imagen_asiento, name='procesar_imagen_asiento'),
+    path('transcribir_audio/', views.transcribir_audio, name='transcribir_audio'),
+    path('guardar_operaciones_lote/', views.guardar_operaciones_lote, name='guardar_operaciones_lote'),
+    path('exportar_caso_ia_excel/', views.exportar_caso_ia_excel, name='exportar_caso_ia_excel'),
+    path('limpiar_asientos_caso/', views.limpiar_asientos_caso, name='limpiar_asientos_caso'),
 ]

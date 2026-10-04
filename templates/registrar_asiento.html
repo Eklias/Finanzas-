@@ -13,50 +13,78 @@
     </div>
     <div class="card-body">
         <!-- ═══ MÓDULO OCR & IA (AUTOCOMPLETADO INTELIGENTE) ═══ -->
-        <div id="ocr-panel" data-url="{% url 'procesar_imagen_asiento' %}" class="ai-ocr-box" style="background: linear-gradient(135deg, #f0fdf4 0%, #eef2ff 100%); border: 1px dashed #6366f1; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
+        <div id="ocr-panel" 
+             data-url="{% url 'procesar_imagen_asiento' %}"
+             data-audio-url="{% url 'transcribir_audio' %}"
+             data-guardar-lote-url="{% url 'guardar_operaciones_lote' %}"
+             data-excel-url="{% url 'exportar_reporte' 'caso-hoja-unica' 'excel' %}"
+             data-exportar-caso-url="{% url 'exportar_caso_ia_excel' %}"
+             data-limpiar-url="{% url 'limpiar_asientos_caso' %}"
+             class="ai-ocr-box" style="background: linear-gradient(135deg, #f0fdf4 0%, #eef2ff 100%); border: 1px dashed #6366f1; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
             <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <span style="font-size: 28px;">📷</span>
                     <div>
-                        <strong style="color: #4338ca; font-size: 1rem; display: block;">Autocompletar con OCR + IA</strong>
+                        <strong style="color: #4338ca; font-size: 1rem; display: block;">Autocompletar con OCR + IA + Voz</strong>
                         <span style="font-size: 0.82rem; color: #475569;">
-                            Sube una foto/comprobante o pega el enunciado contable. Revisa el texto OCR y los resultados antes de cargar una operación.
+                            Sube una foto/comprobante, dicta por voz o pega el enunciado. Revisa las operaciones y descárgalas en Excel.
                         </span>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" id="btnGrabarVoz" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; display: flex; align-items: center; gap: 5px; background: #ffffff; border: 1px solid #cbd5e1; font-weight: 600;" title="Graba audio con tu voz y Groq Whisper lo transcribe automáticamente">
+                        <span id="iconoMicrofono">🎙️</span> <span id="textoBotonVoz">Dictar por Voz</span>
+                    </button>
                     <button type="button" id="btnToggleModoTexto" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
                         ✍️ Pegar Texto
                     </button>
-                    <label for="inputImagenOcr">Imagen del comprobante</label>
-                    <input type="file" name="imagenes" id="inputImagenOcr" accept="image/*" multiple class="form-control" style="max-width: 260px; font-size: 0.85rem; padding: 6px;" title="Puedes seleccionar varias imágenes al mismo tiempo">
+                    <label for="inputImagenOcr" style="margin: 0; font-size: 0.82rem; font-weight: 600; color: #334155;">Imagen:</label>
+                    <input type="file" name="imagenes" id="inputImagenOcr" accept="image/*" multiple class="form-control" style="max-width: 220px; font-size: 0.82rem; padding: 5px;" title="Puedes seleccionar varias imágenes al mismo tiempo">
                     <button type="button" id="btnProcesarOcr" class="btn btn-primary" style="background: #4f46e5; border-color: #4f46e5; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; font-weight: 600;">
-                        <span>✨</span> Procesar imagen o texto
+                        <span>✨</span> Procesar Caso
+                    </button>
+                    <button type="button" id="btnDescargarExcelDirecto" class="btn btn-success btn-sm" style="background: #107c41; border-color: #107c41; color: white; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px;" title="Descargar Caso Completo en Hoja Única (Diario, Cuentas T y Estados Financieros)">
+                        <span>📊</span> Descargar Excel (Hoja Única)
                     </button>
                 </div>
             </div>
 
             <!-- Área de texto alternativa (oculta por defecto) -->
             <div id="contenedorModoTexto" style="display: none; margin-top: 14px;">
-                <textarea id="inputTextoManual" class="form-control" rows="4" placeholder="Pega aquí el texto con las operaciones comerciales (ej. 'El 01/04/09 los socios aportan S/ 10,000 en efectivo...')" style="font-size: 0.85rem;"></textarea>
+                <textarea id="inputTextoManual" class="form-control" rows="4" placeholder="Pega aquí el texto con las operaciones comerciales o dicta por voz (ej. 'El 01/08/2024 se crea una empresa con 80,000 en banco...')" style="font-size: 0.85rem;"></textarea>
             </div>
             
             <!-- Indicador de carga -->
             <div id="ocrLoading" style="display: none; margin-top: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.9); border-radius: 6px; font-size: 0.86rem; color: #4338ca; align-items: center; gap: 8px;">
-                <span id="ocrLoadingText">⏳ Procesando imágenes con OCR (Tesseract) y estructurando asientos con IA (Groq)... Por favor espere.</span>
+                <span id="ocrLoadingText">⏳ Analizando y resolviendo el caso con IA... Por favor espere.</span>
             </div>
 
             <!-- Selector de múltiples operaciones si la IA detectó más de una -->
-            <div id="selectorOperaciones" style="display: none; margin-top: 14px; padding: 12px; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <span style="font-size: 0.82rem; font-weight: 600; color: #334155; display: block; margin-bottom: 8px;">
-                    📌 Operaciones detectadas. Haz clic para cargar una y revisarla:
-                </span>
+            <div id="selectorOperaciones" style="display: none; margin-top: 14px; padding: 14px; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                    <div>
+                        <span id="tituloCasoDetectado" style="font-size: 0.92rem; font-weight: 700; color: #1e293b; display: block;">
+                            📌 Operaciones resueltas por la IA:
+                        </span>
+                        <span style="font-size: 0.78rem; color: #64748b;">
+                            Haz clic en una operación individual para cargarla en el formulario, guárdalas todas o descarga el Excel directo de este caso.
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" id="btnGuardarTodasLote" class="btn btn-primary btn-sm" style="background: #2563eb; border-color: #2563eb; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                            <span>⚡</span> Guardar en BD
+                        </button>
+                        <button type="button" id="btnDescargarExcelCaso" class="btn btn-success btn-sm" style="background: #107c41; border-color: #107c41; color: white; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                            <span>📊</span> Descargar Excel de este Caso (.xlsx)
+                        </button>
+                    </div>
+                </div>
                 <div id="listaOperacionesChips" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             </div>
 
             <div id="ocrResultado" hidden style="margin-top: 14px;">
-                <label for="ocrTextoDetectado">Texto OCR detectado</label>
-                <textarea id="ocrTextoDetectado" class="form-control" rows="6" readonly></textarea>
+                <label for="ocrTextoDetectado" style="font-size: 0.82rem; font-weight: 600; color: #475569;">Texto detectado / enunciado del caso:</label>
+                <textarea id="ocrTextoDetectado" class="form-control" rows="6" readonly style="font-size: 0.85rem; font-family: monospace;"></textarea>
             </div>
 
             <!-- Feedback -->
@@ -124,8 +152,11 @@
 </div>
 
 <div class="card" style="margin-top: 24px;">
-    <div class="card-header">
-        <h3>📋 Asientos Ya Registrados</h3>
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0;">📋 Asientos Ya Registrados</h3>
+        <button type="button" id="btnLimpiarCaso" class="btn btn-danger btn-sm" style="font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Borra todos los asientos actuales para empezar un caso nuevo limpio">
+            <span>🗑️</span> Nuevo Caso (Limpiar Libro)
+        </button>
     </div>
     <div class="card-body" style="padding: 0;">
         <table class="table" style="margin-bottom: 0;">

@@ -7,6 +7,32 @@
 {% block content %}
 <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px;">
 
+    <!-- ═══ TARJETA DESTACADA: CASO COMPLETO EN HOJA ÚNICA (ESTILO EXAMEN UNI) ═══ -->
+    <div class="card" style="box-shadow: 0 4px 18px rgba(16, 124, 65, 0.12); border-radius: 12px; border: 2px solid #107c41; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);">
+        <div class="card-header" style="background: transparent; border-bottom: 1px solid #d1fae5; padding: 18px 24px;">
+            <h3 style="margin: 0; font-size: 1.25rem; color: #065f46; display: flex; align-items: center; gap: 10px;">
+                <span>🌟</span> Caso Ciclo Contable en Hoja Única (.xlsx) — Formato Examen UNI
+            </h3>
+        </div>
+        <div class="card-body" style="padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div style="max-width: 600px;">
+                <p style="color: #1e293b; line-height: 1.5; margin: 0 0 8px 0; font-size: 0.95rem; font-weight: 500;">
+                    Descarga el caso integral resuelto con <strong>Libro Diario + Cuentas T (Mayores) + Estados Financieros (ESF y ER)</strong> todo en <strong>UNA SOLA HOJA DE EXCEL</strong>:
+                </p>
+                <div style="display: flex; gap: 14px; flex-wrap: wrap; font-size: 0.86rem; color: #047857;">
+                    <span>✓ 1. Registro de Diarios</span>
+                    <span>✓ 2. Cuentas T con saldos</span>
+                    <span>✓ 3. Balance General & Estado de Resultados</span>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'exportar_reporte' 'caso-hoja-unica' 'excel' %}" class="btn" style="background: #107c41; color: white; padding: 14px 26px; font-size: 15px; font-weight: 700; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 124, 65, 0.35);">
+                    <span>📥</span> Descargar Caso en Hoja Única (.xlsx)
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- ═══ FILA SUPERIOR: EXCEL MAESTRO Y PDF OFICIAL ═══ -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px;">
         
