@@ -936,30 +936,41 @@ def procesar_imagen_asiento(request):
             "Catálogo real de cuentas (JSON):\n" + json.dumps(catalogo, ensure_ascii=False)
         )
 
-        url = "https://api.groq.com/openai/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-
-        # Modelos activos en Groq
-        modelos = ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b", "llama-3.3-70b-versatile"]
+        deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
         ai_content = None
         last_err = None
 
-        for modelo in modelos:
+        # Lista de proveedores y modelos (si el usuario tiene DeepSeek en .env, lo prioriza; si no, usa Groq)
+        proveedores = []
+        if deepseek_key:
+            proveedores.append({
+                "url": "https://api.deepseek.com/chat/completions",
+                "headers": {"Authorization": f"Bearer {deepseek_key}", "Content-Type": "application/json"},
+                "model": "deepseek-chat",
+                "max_tokens": 4000
+            })
+        if api_key:
+            for modelo_groq in ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]:
+                proveedores.append({
+                    "url": "https://api.groq.com/openai/v1/chat/completions",
+                    "headers": {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                    "model": modelo_groq,
+                    "max_tokens": 3500
+                })
+
+        for prov in proveedores:
             try:
                 payload = {
-                    "model": modelo,
+                    "model": prov["model"],
                     "messages": [
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": f"Texto de operaciones contables:\n\n{texto_ocr}"}
                     ],
                     "response_format": {"type": "json_object"},
-                    "max_tokens": 3500,
+                    "max_tokens": prov["max_tokens"],
                     "temperature": 0.1
                 }
-                response = requests.post(url, json=payload, headers=headers, timeout=30)
+                response = requests.post(prov["url"], json=payload, headers=prov["headers"], timeout=35)
                 if response.status_code == 200:
                     ai_content = response.json()['choices'][0]['message']['content']
                     if ai_content:
@@ -971,7 +982,12 @@ def procesar_imagen_asiento(request):
                 continue
 
         if not ai_content:
-            return JsonResponse({'error': 'No se pudo estructurar el texto con IA. Puede revisar el texto OCR.', 'texto_ocr_detectado': texto_ocr}, status=500)
+            msg = 'No se pudo estructurar el texto con IA. Puede revisar el texto OCR.'
+            if last_err and '429' in str(last_err):
+                msg = 'Límite de velocidad por minuto alcanzado temporalmente en la IA (Rate Limit). Espere unos 15 segundos y vuelva a presionar "Procesar Caso".'
+            elif last_err:
+                msg = f'No se pudo estructurar el texto con IA ({last_err[:120]}). Puede revisar el texto OCR.'
+            return JsonResponse({'error': msg, 'texto_ocr_detectado': texto_ocr}, status=500)
 
         # 3. Parsear y limpiar respuesta JSON
         cleaned_json = ai_content.strip()
