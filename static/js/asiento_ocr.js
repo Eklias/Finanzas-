@@ -284,7 +284,7 @@
                 ultimasOperaciones = data.operaciones;
                 tituloCasoActual = data.titulo_caso || 'CASO CICLO CONTABLE';
                 if (tituloCasoDetectado) {
-                    tituloCasoDetectado.textContent = `📌 ${tituloCasoActual} (${data.operaciones.length} operaciones resueltas):`;
+                    tituloCasoDetectado.textContent = `📌 ${tituloCasoActual} (${data.operaciones.length} operaciones resueltas por ${data.motor_ia || 'IA'}):`;
                 }
 
                 data.operaciones.forEach((operation, index) => {
@@ -296,7 +296,7 @@
                     operations.appendChild(chip);
                 });
                 selector.style.display = 'block';
-                showFeedback(`✅ Caso resuelto: Se estructuraron ${data.operaciones.length} operaciones contables. Puedes descargar directamente el Excel de este caso o guardarlas en BD.`);
+                showFeedback(`✅ Caso resuelto con ${data.motor_ia || 'IA'}: Se estructuraron ${data.operaciones.length} operaciones contables. Puedes descargar directamente el Excel de este caso o guardarlas en BD.`);
             } else {
                 showFeedback('Texto recibido. La IA no identificó operaciones contables en el enunciado.');
             }

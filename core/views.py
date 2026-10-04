@@ -936,11 +936,14 @@ def procesar_imagen_asiento(request):
         deepseek_key = os.environ.get('DEEPSEEK_API_KEY')
         ai_content = None
         last_err = None
+        motor_utilizado = "Groq"
 
-        # Lista de proveedores y modelos (si el usuario tiene DeepSeek en .env, lo prioriza; si no, usa Groq)
+        # Arquitectura especializada: DeepSeek como motor de razonamiento para resolver el caso
+        # Groq se utiliza para transcripción de audio (Whisper) y como respaldo de velocidad.
         proveedores = []
         if deepseek_key:
             proveedores.append({
+                "nombre": "DeepSeek (deepseek-chat)",
                 "url": "https://api.deepseek.com/chat/completions",
                 "headers": {"Authorization": f"Bearer {deepseek_key}", "Content-Type": "application/json"},
                 "model": "deepseek-chat",
@@ -949,6 +952,7 @@ def procesar_imagen_asiento(request):
         if api_key:
             for modelo_groq in ["openai/gpt-oss-120b", "qwen/qwen3.8-27b", "openai/gpt-oss-20b"]:
                 proveedores.append({
+                    "nombre": f"Groq ({modelo_groq})",
                     "url": "https://api.groq.com/openai/v1/chat/completions",
                     "headers": {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
                     "model": modelo_groq,
@@ -967,15 +971,16 @@ def procesar_imagen_asiento(request):
                     "max_tokens": prov["max_tokens"],
                     "temperature": 0.1
                 }
-                response = requests.post(prov["url"], json=payload, headers=prov["headers"], timeout=35)
+                response = requests.post(prov["url"], json=payload, headers=prov["headers"], timeout=45)
                 if response.status_code == 200:
                     ai_content = response.json()['choices'][0]['message']['content']
                     if ai_content:
+                        motor_utilizado = prov["nombre"]
                         break
                 else:
-                    last_err = f"{response.status_code}: {response.text}"
+                    last_err = f"{prov['nombre']} ({response.status_code}): {response.text}"
             except Exception as e:
-                last_err = str(e)
+                last_err = f"{prov['nombre']}: {str(e)}"
                 continue
 
         if not ai_content:
@@ -1005,6 +1010,7 @@ def procesar_imagen_asiento(request):
         except ValueError:
             return JsonResponse({'error': 'La IA devolvió movimientos inválidos.',
                                  'texto_ocr_detectado': texto_ocr}, status=502)
+        data['motor_ia'] = motor_utilizado
         data['texto_ocr_detectado'] = texto_ocr
         return JsonResponse(data)
 
