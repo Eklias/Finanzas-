@@ -889,15 +889,14 @@ def procesar_imagen_asiento(request):
         catalogo = list(CuentaContable.objects.values('codigo', 'nombre', 'tipo', 'subcategoria'))
         system_prompt = (
             "Eres un contador profesional y docente de contabilidad financiera (PCGE - Plan Contable General Empresarial). "
-            "Tu misión es analizar detenidamente el enunciado de CUALQUIER caso o problema contable que te proporcione el usuario, "
-            "pensar paso a paso la lógica contable y estructurar la lista COMPLETA de todas las operaciones del ciclo contable en formato JSON.\n\n"
+            "Tu misión es analizar exhaustivamente TODO el texto u operaciones del caso contable y estructurar la lista COMPLETA de todas las operaciones del ciclo contable en formato JSON.\n\n"
             "Estructura JSON estrictamente requerida:\n"
             "{\n"
-            '  "titulo_caso": "Nombre o título descriptivo del caso (ej: Empresa ABC SAC - Periodo X)",\n'
+            '  "titulo_caso": "Nombre descriptivo del caso (ej: Empresa ABC SAC - Periodo X)",\n'
             '  "operaciones": [\n'
             "    {\n"
             '      "fecha": "YYYY-MM-DD",\n'
-            '      "glosa": "Explicación clara de la operación",\n'
+            '      "glosa": "Descripción clara del hecho",\n'
             '      "movimientos": [\n'
             "        {\n"
             '          "codigo_cuenta": "codigo_del_catalogo",\n'
@@ -911,24 +910,29 @@ def procesar_imagen_asiento(request):
             "  ]\n"
             "}\n\n"
             "CRITERIOS CONTABLES PARA RESOLVER CUALQUIER CASO X:\n"
-            "1. PARTIDA DOBLE OBLIGATORIA: En cada operación, la suma exacta del 'debe' debe ser idéntica a la suma del 'haber'.\n"
-            "2. CATÁLOGO ESTRICTO: Usa ÚNICAMENTE códigos existentes en el catálogo real proporcionado como strings. No inventes códigos ni devuelvas códigos que no existan en este catálogo. Si alguna cuenta no se puede determinar con total seguridad, márcala con pendiente_revision: true.\n"
-            "3. FECHAS REALES: Identifica las fechas reales del enunciado (formato YYYY-MM-DD). Si no indica día específico, asígnales fechas secuenciales coherentes dentro del mes del ejercicio.\n"
-            "4. TRATAMIENTO DE OPERACIONES TÍPICAS:\n"
-            "   - Aporte inicial o constitución: Activos aportados (10 Efectivo, 20 Mercaderías, 33 Inmuebles Maquinaria y Equipo) al 'debe', contra 50 Capital al 'haber'.\n"
-            "   - Compra de mercaderías: 20 Mercaderías al 'debe', contra 10 Efectivo (al contado) o 42 Cuentas por Pagar Comerciales (al crédito) al 'haber'.\n"
-            "   - Venta de mercaderías: 10 Efectivo (al contado) o 12 Cuentas por Cobrar Comerciales (al crédito) al 'debe', contra 70 Ventas al 'haber'.\n"
-            "   - Gastos operativos (servicios, alquiler, asesoría, publicidad): 63 Gastos de Servicios Prestados por Terceros al 'debe', contra 10 Efectivo o 42 Cuentas por Pagar al 'haber'.\n"
-            "   - Gastos de personal / sueldos: 62 Gastos de Personal al 'debe', contra 10 Efectivo o 41 Remuneraciones por Pagar al 'haber'.\n"
-            "   - Préstamos bancarios recibidos: 10 Efectivo al 'debe', contra 45 Obligaciones Financieras al 'haber'.\n"
-            "   - Cobro a clientes / cuentas por cobrar: 10 Efectivo al 'debe', contra 12 Cuentas por Cobrar al 'haber'.\n"
-            "   - Pago a proveedores / acreedores: 42 Cuentas por Pagar al 'debe', contra 10 Efectivo al 'haber'.\n"
-            "5. CÁLCULO DINÁMICO DE COSTO DE VENTAS:\n"
-            "   - Si el caso menciona un inventario final (conteo físico de mercaderías en almacén al cierre): calcula: "
-            "Costo de Ventas = Inventario Inicial (si existe, sino 0) + Compras de mercaderías - Inventario Final. "
-            "Genera la operación al cierre del período: glosa 'Ajuste de costo de ventas por inventario final', con 69 Costo de Ventas al 'debe' y 20 Mercaderías al 'haber' por dicho monto calculado.\n"
-            "   - Si el caso indica directamente el costo de ventas o de la mercadería vendida, genera la operación con 69 al 'debe' y 20 al 'haber' por ese monto.\n"
-            "6. Devuelve ÚNICAMENTE el objeto JSON sin explicaciones adicionales ni código markdown.\n\n"
+            "1. EXHAUSTIVIDAD TOTAL: Si el texto o imagen contiene varias diapositivas, hojas o partes apiladas verticalmente (por ejemplo, con títulos como 'Continuación', o Diapositiva 19 y 20), debes extraer e incluir TODAS las operaciones de TODAS las partes hasta el final (hasta 'Se pide'). NUNCA te detengas en la mitad.\n"
+            "2. PARTIDA DOBLE OBLIGATORIA: En cada operación, la suma exacta del 'debe' debe ser idéntica a la suma del 'haber'.\n"
+            "3. CATÁLOGO ESTRICTO: Usa ÚNICAMENTE códigos existentes en el catálogo real proporcionado como strings. No inventes códigos ni devuelvas códigos que no existan en este catálogo. Si alguna cuenta no se puede determinar con total seguridad, márcala con pendiente_revision: true.\n"
+            "4. FECHAS REALES: Identifica las fechas reales del enunciado (formato YYYY-MM-DD). Si no indica día específico, asígnales fechas secuenciales coherentes dentro del mes del ejercicio.\n"
+            "5. TRATAMIENTO DE OPERACIONES TÍPICAS:\n"
+            "   - Aporte inicial o constitución: Activos aportados (10 Efectivo, 20 Mercaderías, 33 IME) al 'debe', contra 50 Capital al 'haber'.\n"
+            "   - Compra de mercaderías y activos fijos: 20 Mercaderías o 33 Inmuebles, Maquinaria y Equipo al 'debe', contra 10 Efectivo o 42/46 Cuentas por Pagar al 'haber'.\n"
+            "   - Venta de mercaderías: 10 Efectivo y/o 12 Cuentas por Cobrar al 'debe', contra 70 Ventas al 'haber'.\n"
+            "   - Devolución de mercadería con reembolso: 10 Efectivo al 'debe' / 20 Mercaderías al 'haber'.\n"
+            "   - Cobro de factura / cuentas por cobrar: 10 Efectivo al 'debe' / 12 Cuentas por Cobrar al 'haber'.\n"
+            "   - Donación de mercadería recibida: 20 Mercaderías al 'debe' / 75 Otros Ingresos de Gestión al 'haber'.\n"
+            "   - Pérdida por siniestro o incendio: 65 Otros Gastos de Gestión al 'debe' / 20 Mercaderías al 'haber'.\n"
+            "   - Gastos devengados impagos (sueldos pendientes): 62 Gastos de Personal al 'debe' / 41 Remuneraciones por Pagar al 'haber'.\n"
+            "   - Gastos de servicios (alquiler, luz, agua): 63 Gastos de Servicios Prestados por Terceros al 'debe' / 10 Efectivo al 'haber'.\n"
+            "6. CÁLCULO DINÁMICO DE COSTO DE VENTAS:\n"
+            "   - Si el caso menciona inventario final (conteo físico de mercaderías al cierre): calcula: "
+            "Costo de Ventas = Inventario Inicial + Compras de mercaderías (y donaciones) - Devoluciones - Pérdida por incendio - Inventario Final. "
+            "Genera la operación al cierre: glosa 'Ajuste de costo de ventas por inventario final', con 69 Costo de Ventas al 'debe' y 20 Mercaderías al 'haber'.\n"
+            "7. AJUSTE DE DEPRECIACIÓN:\n"
+            "   - Si se adquirieron activos fijos con vida útil estimada y se pide preparar Estados Financieros al cierre: "
+            "calcula la depreciación del período transcurrido: (Costo - Valor de rescate) / Vida útil. "
+            "Genera el asiento al cierre: 68 Valuación y Deterioro al 'debe' / 39 Depreciación Acumulada al 'haber'.\n"
+            "8. Devuelve ÚNICAMENTE el objeto JSON sin explicaciones adicionales ni código markdown.\n\n"
             "Catálogo real de cuentas (JSON):\n" + json.dumps(catalogo, ensure_ascii=False)
         )
 
@@ -952,6 +956,7 @@ def procesar_imagen_asiento(request):
                         {"role": "user", "content": f"Texto de operaciones contables:\n\n{texto_ocr}"}
                     ],
                     "response_format": {"type": "json_object"},
+                    "max_tokens": 3500,
                     "temperature": 0.1
                 }
                 response = requests.post(url, json=payload, headers=headers, timeout=30)
