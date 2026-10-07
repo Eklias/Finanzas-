@@ -32,4 +32,5 @@ urlpatterns = [
     path('guardar_operaciones_lote/', views.guardar_operaciones_lote, name='guardar_operaciones_lote'),
     path('exportar_caso_ia_excel/', views.exportar_caso_ia_excel, name='exportar_caso_ia_excel'),
     path('limpiar_asientos_caso/', views.limpiar_asientos_caso, name='limpiar_asientos_caso'),
+    path('cargar-datos-ejemplo/', views.cargar_datos_ejemplo, name='cargar_datos_ejemplo'),
 ]

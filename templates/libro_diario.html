@@ -1,15 +1,21 @@
 {% extends 'base.html' %}
 {% load contable_tags %}
 
-{% block title %}Libro Diario — ContaSys{% endblock %}
+{% block title %}Libro Diario — Finanzas{% endblock %}
 {% block nav_diario %}active{% endblock %}
-{% block page_title %}📖 Libro Diario{% endblock %}
-{% block page_subtitle %}Todos los asientos contables ordenados cronológicamente{% endblock %}
+{% block page_title %}📖 Libro Diario General{% endblock %}
+{% block page_subtitle %}Registro cronológico de operaciones contables en partida doble{% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'exportar_reporte' 'diario' 'excel' %}" class="btn btn-sm" style="background:#217346; color:white; font-weight:600; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">📊 Excel</a>
-<a href="{% url 'exportar_reporte' 'diario' 'csv' %}" class="btn btn-sm" style="background:#475569; color:white; font-weight:600; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">📄 CSV</a>
-<a href="{% url 'registrar_asiento' %}" class="btn btn-primary btn-sm">✏️ Nuevo Asiento</a>
+<a href="{% url 'exportar_reporte' 'diario' 'excel' %}" class="btn btn-sm btn-excel">
+    <span>📊</span> Exportar Excel
+</a>
+<a href="{% url 'exportar_reporte' 'diario' 'csv' %}" class="btn btn-sm btn-secondary">
+    <span>📄</span> Exportar CSV
+</a>
+<a href="{% url 'registrar_asiento' %}" class="btn btn-primary btn-sm">
+    <span>✏️</span> Nuevo Asiento
+</a>
 {% endblock %}
 
 {% block content %}
@@ -17,12 +23,12 @@
     {% for asiento in asientos %}
     <div class="asiento-card">
         <div class="asiento-header">
-            <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                 <span class="asiento-id">Asiento #{{ forloop.counter }}</span>
                 <span class="asiento-fecha">📅 {{ asiento.fecha|date:"d/m/Y" }}</span>
             </div>
             
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 8px;">
                 <button type="button" class="btn-edit" onclick="abrirModalEditar({{ asiento.id }}, {{ forloop.counter }}, '{{ asiento.fecha|date:'Y-m-d' }}', '{{ asiento.descripcion|escapejs }}')">
                     ✏️ Editar
                 </button>
@@ -35,7 +41,9 @@
         </div>
         
         {% if asiento.descripcion %}
-        <div class="asiento-desc">{{ asiento.descripcion }}</div>
+        <div class="asiento-desc">
+            <strong>Glosa:</strong> {{ asiento.descripcion }}
+        </div>
         {% endif %}
         
         <div class="table-container">
@@ -49,17 +57,18 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Cuenta</th>
-                        <th class="text-right">Debe</th>
-                        <th class="text-right">Haber</th>
+                        <th>Cuenta Contable</th>
+                        <th class="text-right" style="width: 170px;">Debe (Cargo)</th>
+                        <th class="text-right" style="width: 170px;">Haber (Abono)</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for mov in asiento.movimientos.all %}
                     <tr>
                         <td>
-                            <strong>{{ mov.cuenta.codigo }}</strong> — {{ mov.cuenta.nombre }}
-                            <span class="badge {{ mov.cuenta.tipo|tipo_badge }}">{{ mov.cuenta.get_tipo_display }}</span>
+                            <strong class="cuentas-code" style="margin-right: 8px;">{{ mov.cuenta.codigo }}</strong>
+                            <span style="font-weight: 600; color: var(--text);">{{ mov.cuenta.nombre }}</span>
+                            <span class="badge {{ mov.cuenta.tipo|tipo_badge }}" style="margin-left: 8px;">{{ mov.cuenta.get_tipo_display }}</span>
                         </td>
                         <td class="text-right monto">
                             {% if mov.tipo == 'debe' %}<span class="text-debe">{{ mov.monto|formato_moneda }}</span>{% endif %}
@@ -83,17 +92,23 @@
         <div class="card-body">
             <div class="empty-state">
                 <div class="empty-icon">📖</div>
-                <h4>No hay asientos registrados</h4>
-                <a href="{% url 'registrar_asiento' %}" class="btn btn-primary" style="margin-top: 16px;">✏️ Registrar Asiento</a>
+                <h4>No hay asientos registrados en el Libro Diario</h4>
+                <p>Las operaciones registradas se ordenarán cronológicamente en esta vista.</p>
+                <div style="margin-top: 20px;">
+                    <a href="{% url 'registrar_asiento' %}" class="btn btn-primary">
+                        <span>✏️</span> Registrar Primer Asiento
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 {% endif %}
 
+<!-- Modal de Edición de Asiento -->
 <div id="modalEditar" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>✏️ Editar Asiento #<span id="modal-asiento-num"></span></h3>
+            <h3><span>✏️</span> Editar Asiento #<span id="modal-asiento-num"></span></h3>
             <span class="close" onclick="cerrarModal()">&times;</span>
         </div>
         <div class="modal-body">
@@ -101,24 +116,29 @@
                 {% csrf_token %}
                 <div class="form-row">
                     <div class="form-group">
-                        <label>📅 Fecha</label>
+                        <label for="edit_fecha">📅 Fecha</label>
                         <input type="date" name="fecha" id="edit_fecha" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label>📝 Descripción</label>
+                        <label for="edit_descripcion">📝 Descripción / Glosa</label>
                         <input type="text" name="descripcion" id="edit_descripcion" class="form-control">
                     </div>
                 </div>
 
-                <hr style="margin: 15px 0; border-top: 1px solid var(--border);">
+                <hr style="margin: 18px 0; border: none; border-top: 1px solid var(--border);">
 
-                <h4 style="margin-bottom: 10px; color: var(--primary);">📊 Movimientos</h4>
-                <div id="edit-movimientos-container">
-                    </div>
-                
-                <button type="button" onclick="agregarMovimientoEdit()" class="btn btn-secondary btn-sm" style="margin-top: 10px;">➕ Agregar Línea</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h4 style="color: var(--primary); font-size: 1rem; font-weight: 700; margin: 0;">
+                        <span>📊</span> Movimientos del Asiento
+                    </h4>
+                    <button type="button" onclick="agregarMovimientoEdit()" class="btn btn-secondary btn-sm">
+                        ➕ Agregar Línea
+                    </button>
+                </div>
 
-                <div class="balance-preview" style="margin-top: 15px;">
+                <div id="edit-movimientos-container"></div>
+
+                <div class="balance-preview" style="margin-top: 18px;">
                     <div class="balance-item"><span class="balance-label">Total Debe:</span> <span class="balance-value text-debe" id="editTotalDebe">S/ 0.00</span></div>
                     <div class="balance-item"><span class="balance-label">Total Haber:</span> <span class="balance-value text-haber" id="editTotalHaber">S/ 0.00</span></div>
                     <span class="balance-status" id="editBalanceStatus">—</span>
@@ -126,7 +146,7 @@
 
                 <input type="hidden" name="num_movimientos" id="editNumMovimientos" value="0">
 
-                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
                     <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary" id="btnGuardarEdit">💾 Actualizar Asiento</button>
                 </div>
@@ -134,24 +154,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    /* Estilos Modal */
-    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
-    .modal-content { background-color: #fff; margin: 5% auto; border-radius: var(--radius); width: 80%; max-width: 800px; box-shadow: var(--shadow-lg); }
-    .modal-header { padding: 15px 20px; background: #f7fafc; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; border-radius: var(--radius) var(--radius) 0 0; }
-    .modal-header h3 { margin: 0; color: var(--primary); font-size: 1.1rem; }
-    .close { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
-    .close:hover { color: #333; }
-    .modal-body { padding: 20px; }
-    
-    /* Botones tarjeta */
-    .btn-edit, .btn-delete { border: 1px solid transparent; padding: 6px 12px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; cursor: pointer; text-decoration: none; }
-    .btn-edit { background-color: #ebf8ff; color: #2b6cb0; border-color: #bee3f8; }
-    .btn-edit:hover { background-color: #2b6cb0; color: white; }
-    .btn-delete { background-color: #fff5f5; color: #e53e3e; border-color: #fed7d7; }
-    .btn-delete:hover { background-color: #e53e3e; color: white; }
-</style>
 {% endblock %}
 
 {% block extra_js %}
@@ -161,17 +163,14 @@
     ];
     let editContadorMov = 0;
 
-    // AHORA RECIBE EL 'numVisual' COMO SEGUNDO PARÁMETRO
     function abrirModalEditar(id, numVisual, fecha, descripcion) {
         document.getElementById('modalEditar').style.display = 'block';
-        document.getElementById('modal-asiento-num').innerText = numVisual; // Mostramos el número cronológico
-        document.getElementById('formEditarAsiento').action = `/asientos/editar/${id}/`; // Enviamos al ID real
+        document.getElementById('modal-asiento-num').innerText = numVisual;
+        document.getElementById('formEditarAsiento').action = `/asientos/editar/${id}/`;
         
-        // Cargar cabecera
         document.getElementById('edit_fecha').value = fecha;
         document.getElementById('edit_descripcion').value = descripcion;
         
-        // Cargar movimientos desde el HTML
         document.getElementById('edit-movimientos-container').innerHTML = '';
         editContadorMov = 0;
         
@@ -194,7 +193,7 @@
         row.className = 'movimiento-row';
         row.id = `edit-mov-row-${idx}`;
 
-        let options = '<option value="">— Seleccionar —</option>';
+        let options = '<option value="">— Seleccionar Cuenta —</option>';
         CUENTAS.forEach(c => {
             const selected = (c.id == cuentaId) ? 'selected' : '';
             options += `<option value="${c.id}" ${selected}>${c.text}</option>`;
@@ -212,7 +211,7 @@
             <div class="form-group">
                 <input type="number" name="monto_${idx}" class="form-control" step="0.01" min="0.01" value="${monto}" required oninput="actualizarBalanceEdit()">
             </div>
-            <button type="button" class="btn-remove" onclick="eliminarMovimientoEdit(${idx})">✕</button>
+            <button type="button" class="btn-remove" onclick="eliminarMovimientoEdit(${idx})" title="Eliminar">✕</button>
         `;
         container.appendChild(row);
         actualizarBalanceEdit();
@@ -231,7 +230,11 @@
             const selects = row.querySelectorAll('select');
             const input = row.querySelector('input');
             if(selects[0]) selects[0].name = `cuenta_${idx}`;
-            if(selects[1]) { selects[1].name = `tipo_${idx}`; if(selects[1].value == 'debe') tDebe += parseFloat(input.value||0); else if(selects[1].value == 'haber') tHaber += parseFloat(input.value||0); }
+            if(selects[1]) { 
+                selects[1].name = `tipo_${idx}`; 
+                if(selects[1].value == 'debe') tDebe += parseFloat(input.value||0); 
+                else if(selects[1].value == 'haber') tHaber += parseFloat(input.value||0); 
+            }
             if(input) input.name = `monto_${idx}`;
             idx++;
         });
@@ -248,6 +251,8 @@
         }
     }
 
-    window.onclick = function(event) { if (event.target == document.getElementById('modalEditar')) cerrarModal(); }
+    window.onclick = function(event) { 
+        if (event.target == document.getElementById('modalEditar')) cerrarModal(); 
+    }
 </script>
 {% endblock %}

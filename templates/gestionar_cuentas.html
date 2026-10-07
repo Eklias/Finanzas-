@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static contable_tags %}
 
-{% block title %}Plan de Cuentas — ContaSys{% endblock %}
+{% block title %}Plan de Cuentas — Finanzas{% endblock %}
 {% block nav_cuentas %}active{% endblock %}
-{% block page_title %}Plan de Cuentas{% endblock %}
-{% block page_subtitle %}Organiza y consulta tu catálogo contable{% endblock %}
+{% block page_title %}📋 Catálogo y Plan de Cuentas{% endblock %}
+{% block page_subtitle %}Estructura oficial del Plan Contable General Empresarial (PCGE) y su clasificación patrimonial{% endblock %}
 {% block page_actions %}
-<a href="#nueva-cuenta" class="btn btn-primary cuentas-new-link"><span aria-hidden="true">＋</span> Nueva cuenta</a>
+<a href="#nueva-cuenta" class="btn btn-primary cuentas-new-link"><span aria-hidden="true">＋</span> Nueva Cuenta</a>
 {% endblock %}
 
 {% block content %}
@@ -14,8 +14,8 @@
     <section class="card cuentas-catalogo" aria-labelledby="catalogo-title">
         <div class="card-header cuentas-card-header">
             <div>
-                <h3 id="catalogo-title">Catálogo de cuentas <span class="cuentas-total">{{ cuentas|length }}</span></h3>
-                <p>Consulta los códigos y la clasificación de tus cuentas.</p>
+                <h3 id="catalogo-title">Catálogo de Cuentas Contables <span class="cuentas-total">{{ cuentas|length }}</span></h3>
+                <p style="color: var(--text-secondary); font-size: 0.82rem; margin-top: 3px;">Consulta los códigos, nombres y la clasificación de tus cuentas.</p>
             </div>
         </div>
         <div id="cuentas-filtros" class="cuentas-filtros" hidden>
@@ -51,11 +51,11 @@
             <table class="cuentas-table">
                 <thead>
                     <tr>
-                        <th scope="col">Código</th>
-                        <th scope="col">Nombre de la cuenta</th>
-                        <th scope="col">Tipo</th>
-                        <th scope="col">Subcategoría</th>
-                        <th scope="col" class="text-center">Acciones</th>
+                        <th scope="col" style="width: 100px;">Código</th>
+                        <th scope="col">Nombre de la Cuenta</th>
+                        <th scope="col" style="width: 140px;">Elemento</th>
+                        <th scope="col" style="width: 180px;">Subcategoría</th>
+                        <th scope="col" class="text-center" style="width: 80px;">Acciones</th>
                     </tr>
                 </thead>
                 <tbody id="cuentas-body">
@@ -78,16 +78,16 @@
         <div id="cuentas-sin-resultados" class="empty-state cuentas-empty" hidden>
             <div class="cuentas-empty-symbol" aria-hidden="true">⌕</div>
             <h4>No encontramos cuentas</h4>
-            <p>Prueba otro código, nombre o clasificación.</p>
-            <button type="button" class="btn btn-secondary" data-limpiar>Limpiar filtros</button>
+            <p>Prueba con otro código, nombre o filtro de clasificación.</p>
+            <button type="button" class="btn btn-secondary btn-sm" data-limpiar style="margin-top: 10px;">Limpiar filtros</button>
         </div>
-        <div class="cuentas-table-note">Las cuentas con movimientos asociados no se pueden eliminar.</div>
+        <div class="cuentas-table-note">ℹ️ Las cuentas que ya tienen asientos o movimientos asociados no pueden ser eliminadas para proteger la integridad contable.</div>
         {% else %}
         <div class="empty-state cuentas-empty">
             <div class="cuentas-empty-symbol" aria-hidden="true">＋</div>
-            <h4>Tu catálogo comienza aquí</h4>
-            <p>Crea tu primera cuenta para empezar a registrar asientos.</p>
-            <a href="#nueva-cuenta" class="btn btn-primary cuentas-new-link">Crear primera cuenta</a>
+            <h4>El catálogo contable está vacío</h4>
+            <p>Crea tu primera cuenta contable o importa un caso para comenzar.</p>
+            <a href="#nueva-cuenta" class="btn btn-primary cuentas-new-link" style="margin-top: 14px;">Crear primera cuenta</a>
         </div>
         {% endif %}
     </section>
@@ -95,9 +95,9 @@
     <section id="nueva-cuenta" class="card cuentas-form-card" aria-labelledby="nueva-cuenta-title">
         <div class="card-header cuentas-card-header">
             <div>
-                <span class="cuentas-eyebrow">AMPLÍA TU CATÁLOGO</span>
-                <h3 id="nueva-cuenta-title">Nueva cuenta</h3>
-                <p>Define su código, nombre y clasificación.</p>
+                <span class="cuentas-eyebrow">REGISTRO DE CUENTA</span>
+                <h3 id="nueva-cuenta-title">Nueva Cuenta Contable</h3>
+                <p style="color: var(--text-secondary); font-size: 0.82rem; margin-top: 3px;">Define código, nombre y clasificación.</p>
             </div>
         </div>
         <div class="card-body">
@@ -105,15 +105,15 @@
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_codigo">Código <span class="cuentas-required" aria-hidden="true">*</span></label>
-                    <input type="text" name="codigo" id="id_codigo" class="form-control" placeholder="Ej. 10" maxlength="20" value="{{ formulario.codigo }}" aria-describedby="codigo-ayuda" required>
-                    <small id="codigo-ayuda" class="cuentas-help">Debe ser único dentro del catálogo.</small>
+                    <input type="text" name="codigo" id="id_codigo" class="form-control" placeholder="Ej. 10.1" maxlength="20" value="{{ formulario.codigo }}" aria-describedby="codigo-ayuda" required>
+                    <small id="codigo-ayuda" class="cuentas-help">Código único según la estructura del PCGE.</small>
                 </div>
                 <div class="form-group">
-                    <label for="id_nombre">Nombre de la cuenta <span class="cuentas-required" aria-hidden="true">*</span></label>
-                    <input type="text" name="nombre" id="id_nombre" class="form-control" placeholder="Ej. Efectivo y equivalentes" maxlength="200" value="{{ formulario.nombre }}" required>
+                    <label for="id_nombre">Nombre de la Cuenta <span class="cuentas-required" aria-hidden="true">*</span></label>
+                    <input type="text" name="nombre" id="id_nombre" class="form-control" placeholder="Ej. Caja y Bancos" maxlength="200" value="{{ formulario.nombre }}" required>
                 </div>
                 <div class="form-group">
-                    <label for="id_tipo">Tipo de cuenta <span class="cuentas-required" aria-hidden="true">*</span></label>
+                    <label for="id_tipo">Tipo / Elemento <span class="cuentas-required" aria-hidden="true">*</span></label>
                     <select name="tipo" id="id_tipo" class="form-control" required>
                         <option value="">Selecciona un tipo</option>
                         {% for valor, etiqueta in tipos %}
@@ -128,10 +128,12 @@
                         <option value="{{ valor }}"{% if formulario.subcategoria == valor %} selected{% endif %}>{{ etiqueta }}</option>
                         {% endfor %}
                     </select>
-                    <small id="subcategoria-ayuda" class="cuentas-help">Agrupa las cuentas. En gastos e ingresos también determina su presentación en el Estado de Resultados.</small>
+                    <small id="subcategoria-ayuda" class="cuentas-help">Determina su presentación en el Balance General o Estado de Resultados.</small>
                 </div>
-                <button type="submit" class="btn btn-primary cuentas-submit"><span aria-hidden="true">＋</span> Crear cuenta</button>
-                <p class="cuentas-form-note">Los campos con * son obligatorios.</p>
+                <button type="submit" class="btn btn-primary cuentas-submit" style="width: 100%; margin-top: 10px;">
+                    <span aria-hidden="true">＋</span> Crear Cuenta
+                </button>
+                <p class="cuentas-form-note" style="margin-top: 12px; color: var(--text-muted); font-size: 0.74rem;">Los campos con * son obligatorios.</p>
             </form>
         </div>
     </section>

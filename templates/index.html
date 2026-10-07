@@ -1,111 +1,233 @@
 {% extends 'base.html' %}
 {% load contable_tags %}
 
-{% block title %}Inicio — ContaSys{% endblock %}
+{% block title %}Inicio — Finanzas{% endblock %}
 {% block nav_index %}active{% endblock %}
-{% block page_title %}Panel Principal{% endblock %}
-{% block page_subtitle %}Resumen general del sistema contable{% endblock %}
+{% block page_title %}Panel Financiero Ejecutivo{% endblock %}
+{% block page_subtitle %}Monitoreo integral del ciclo contable y estados financieros en tiempo real{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'registrar_asiento' %}" class="btn btn-primary btn-sm">
+    <span>✏️</span> Nuevo Asiento
+</a>
+<a href="{% url 'reporte_completo' %}" class="btn btn-excel btn-sm">
+    <span>📊</span> Exportar Reportes
+</a>
+{% endblock %}
 
 {% block content %}
-<!-- ═══ ESTADÍSTICAS ═══ -->
+<!-- ═══ BANNER EJECUTIVO DEL SISTEMA CONTABLE ═══ -->
+<div class="dashboard-hero-banner">
+    <div class="hero-banner-content">
+        <h3>
+            <span>📊</span> Sistema de Gestión Financiera y Contable
+        </h3>
+        <p>
+            Ciclo contable activo bajo el Plan Contable General Empresarial (PCGE). Integración de partida doble, mayores en cuentas T y generación automática de estados financieros.
+        </p>
+    </div>
+    <div class="hero-banner-actions">
+        <a href="{% url 'balance_general' %}" class="btn btn-primary btn-sm">
+            <span>🏦</span> Ver Balance General
+        </a>
+        <a href="{% url 'estado_resultados' %}" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2);">
+            <span>📈</span> Estado de Resultados
+        </a>
+    </div>
+</div>
+
+<!-- ═══ KPIS / ESTADÍSTICAS CONTABLES ═══ -->
 <div class="stats-grid">
     <div class="stat-card">
-        <div class="stat-icon blue">📋</div>
+        <div class="stat-icon emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;flex-shrink:0;">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <h4>{{ total_cuentas }}</h4>
-            <p>Cuentas Contables</p>
+            <p>Cuentas Activas</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green">📝</div>
+        <div class="stat-icon indigo">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;flex-shrink:0;">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <h4>{{ total_asientos }}</h4>
-            <p>Asientos Registrados</p>
+            <p>Asientos en Diario</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon purple">🔢</div>
+        <div class="stat-icon violet">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;flex-shrink:0;">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <h4>{{ total_movimientos }}</h4>
-            <p>Movimientos Totales</p>
+            <p>Movimientos Contables</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon orange">💰</div>
+        <div class="stat-icon amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                <path d="M12 18V6"/>
+            </svg>
+        </div>
         <div class="stat-info">
             <h4>{{ total_debe|formato_moneda }}</h4>
-            <p>Total Debe / Haber</p>
+            <p>Volumen Debe / Haber</p>
         </div>
     </div>
 </div>
 
-<!-- ═══ ACCIONES RÁPIDAS ═══ -->
-<h3 style="margin-bottom: 16px; color: var(--primary); font-size: 1.05rem;">Acciones Rápidas</h3>
+<!-- ═══ MÓDULOS DEL SISTEMA ═══ -->
+<div class="actions-section-title">
+    <span>⚡</span> Módulos y Flujos del Sistema
+</div>
 <div class="actions-grid">
     <a href="{% url 'gestionar_cuentas' %}" class="action-card">
-        <div class="action-icon">📋</div>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <line x1="8" y1="6" x2="21" y2="6"/>
+                <line x1="8" y1="12" x2="21" y2="12"/>
+                <line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/>
+                <line x1="3" y1="12" x2="3.01" y2="12"/>
+                <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+        </div>
         <h4>Plan de Cuentas</h4>
-        <p>Gestionar el catálogo de cuentas contables y su clasificación</p>
+        <p>Catálogo contable estructurado por elementos del PCGE.</p>
     </a>
     <a href="{% url 'registrar_asiento' %}" class="action-card">
-        <div class="action-icon">✏️</div>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+        </div>
         <h4>Registrar Asiento</h4>
-        <p>Crear un nuevo asiento contable con sus movimientos al Debe y Haber</p>
+        <p>Asistencia con IA, OCR y cálculo de balance en tiempo real.</p>
     </a>
     <a href="{% url 'libro_diario' %}" class="action-card">
-        <div class="action-icon">📖</div>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+        </div>
         <h4>Libro Diario</h4>
-        <p>Consultar todos los asientos registrados ordenados por fecha</p>
+        <p>Historial cronológico de asientos y edición de registros.</p>
     </a>
     <a href="{% url 'libro_mayor' %}" class="action-card">
-        <div class="action-icon">📚</div>
-        <h4>Libro Mayor</h4>
-        <p>Ver los movimientos y saldos agrupados por cada cuenta contable</p>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <line x1="12" y1="3" x2="12" y2="21"/>
+                <line x1="3" y1="9" x2="21" y2="9"/>
+            </svg>
+        </div>
+        <h4>Libro Mayor (Cuentas T)</h4>
+        <p>Saldos deudores y acreedores por cada cuenta contable.</p>
     </a>
     <a href="{% url 'balance_comprobacion' %}" class="action-card">
-        <div class="action-icon">⚖️</div>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="m4.93 4.93 4.24 4.24"/>
+                <path d="m14.83 9.17 4.24-4.24"/>
+                <path d="m14.83 14.83 4.24 4.24"/>
+                <path d="m9.17 14.83-4.24 4.24"/>
+            </svg>
+        </div>
         <h4>Balance de Comprobación</h4>
-        <p>Verificar que los totales de Debe y Haber estén cuadrados</p>
+        <p>Verificación matemática del cuadre de Sumas y Saldos.</p>
     </a>
     <a href="{% url 'estado_resultados' %}" class="action-card">
-        <div class="action-icon">📈</div>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+            </svg>
+        </div>
         <h4>Estado de Resultados</h4>
-        <p>Calcular la utilidad o pérdida del período</p>
+        <p>Cálculo de Utilidad Bruta, Operativa y Neta del ejercicio.</p>
     </a>
     <a href="{% url 'balance_general' %}" class="action-card">
-        <div class="action-icon">🏦</div>
-        <h4>Balance General</h4>
-        <p>Verificar la ecuación contable: Activo = Pasivo + Patrimonio</p>
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <line x1="3" y1="21" x2="21" y2="21"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+                <polyline points="5 6 12 3 19 6"/>
+                <line x1="4" y1="10" x2="4" y2="21"/>
+                <line x1="20" y1="10" x2="20" y2="21"/>
+            </svg>
+        </div>
+        <h4>Balance General (ESF)</h4>
+        <p>Equilibrio patrimonial: Activo = Pasivo + Patrimonio.</p>
+    </a>
+    <a href="{% url 'reporte_completo' %}" class="action-card">
+        <div class="action-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0;">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+        </div>
+        <h4>Centro de Exportación</h4>
+        <p>Descarga de modelos en Excel de 4 hojas, Hoja Única y PDF.</p>
     </a>
 </div>
 
-<!-- ═══ ÚLTIMOS ASIENTOS ═══ -->
+<!-- ═══ ÚLTIMOS ASIENTOS REGISTRADOS ═══ -->
 {% if ultimos_asientos %}
-<div class="card" style="margin-top: 8px;">
+<div class="card">
     <div class="card-header">
-        <h3>📝 Últimos Asientos Registrados</h3>
-        <a href="{% url 'libro_diario' %}" class="btn btn-sm btn-secondary">Ver todos →</a>
+        <h3><span>📝</span> Últimos Asientos Registrados</h3>
+        <a href="{% url 'libro_diario' %}" class="btn btn-sm btn-secondary">Ver libro diario completo →</a>
     </div>
     <div class="card-body" style="padding: 0;">
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>N°</th>
-                        <th>Fecha</th>
-                        <th>Descripción</th>
-                        <th class="text-right">Debe</th>
-                        <th class="text-right">Haber</th>
+                        <th style="width: 90px;">Asiento</th>
+                        <th style="width: 120px;">Fecha</th>
+                        <th>Descripción / Glosa</th>
+                        <th class="text-right" style="width: 160px;">Debe</th>
+                        <th class="text-right" style="width: 160px;">Haber</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for asiento in ultimos_asientos %}
                     <tr>
-                        <td><strong>#{{ asiento.id }}</strong></td>
-                        <td>{{ asiento.fecha|date:"d/m/Y" }}</td>
-                        <td>{{ asiento.descripcion|truncatewords:10 }}</td>
-                        <td class="text-right monto text-debe">{{ asiento.total_debe|formato_moneda }}</td>
-                        <td class="text-right monto text-haber">{{ asiento.total_haber|formato_moneda }}</td>
+                        <td>
+                            <span class="asiento-id">#{{ asiento.id }}</span>
+                        </td>
+                        <td style="color: var(--text-secondary); font-weight: 600;">
+                            {{ asiento.fecha|date:"d/m/Y" }}
+                        </td>
+                        <td style="font-weight: 500;">
+                            {{ asiento.descripcion|truncatewords:14 }}
+                        </td>
+                        <td class="text-right monto text-debe">
+                            {{ asiento.total_debe|formato_moneda }}
+                        </td>
+                        <td class="text-right monto text-haber">
+                            {{ asiento.total_haber|formato_moneda }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

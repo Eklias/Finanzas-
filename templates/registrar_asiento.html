@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load contable_tags static %}
 
-{% block title %}Registrar Asiento — ContaSys{% endblock %}
+{% block title %}Registrar Asiento — Finanzas{% endblock %}
 {% block nav_registrar %}active{% endblock %}
 {% block page_title %}Registrar Asiento Contable{% endblock %}
-{% block page_subtitle %}Ingrese los datos del asiento y sus movimientos (mín. 2 líneas){% endblock %}
+{% block page_subtitle %}Ingreso de operaciones con verificación en tiempo real de partida doble{% endblock %}
 
 {% block content %}
 <div class="card">
     <div class="card-header">
-        <h3>✏️ Nuevo Asiento Contable</h3>
+        <h3><span>✏️</span> Nuevo Asiento Contable</h3>
     </div>
     <div class="card-body">
         <!-- ═══ MÓDULO OCR & IA (AUTOCOMPLETADO INTELIGENTE) ═══ -->
@@ -20,113 +20,122 @@
              data-excel-url="{% url 'exportar_reporte' 'caso-hoja-unica' 'excel' %}"
              data-exportar-caso-url="{% url 'exportar_caso_ia_excel' %}"
              data-limpiar-url="{% url 'limpiar_asientos_caso' %}"
-             class="ai-ocr-box" style="background: linear-gradient(135deg, #f0fdf4 0%, #eef2ff 100%); border: 1px dashed #6366f1; border-radius: 10px; padding: 18px; margin-bottom: 24px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 28px;">📷</span>
+             class="ai-ocr-box" style="padding: 22px; margin-bottom: 28px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%); display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);">
+                        🤖
+                    </div>
                     <div>
-                        <strong style="color: #4338ca; font-size: 1rem; display: block;">Autocompletar con OCR + IA + Voz</strong>
-                        <span style="font-size: 0.82rem; color: #475569;">
-                            Sube una foto/comprobante, dicta por voz o pega el enunciado. Revisa las operaciones y descárgalas en Excel.
+                        <strong style="color: var(--primary); font-size: 1.05rem; display: block; font-weight: 800;">
+                            Asistencia Inteligente (OCR + IA + Dictado por Voz)
+                        </strong>
+                        <span style="font-size: 0.84rem; color: var(--text-secondary);">
+                            Sube una fotografía de enunciado, dicta por micrófono o pega el texto para resolver el caso automáticamente.
                         </span>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" id="btnGrabarVoz" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; display: flex; align-items: center; gap: 5px; background: #ffffff; border: 1px solid #cbd5e1; font-weight: 600;" title="Graba audio con tu voz y Groq Whisper lo transcribe automáticamente">
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" id="btnGrabarVoz" class="btn btn-secondary btn-sm" title="Graba audio con tu voz y Groq Whisper lo transcribe automáticamente">
                         <span id="iconoMicrofono">🎙️</span> <span id="textoBotonVoz">Dictar por Voz</span>
                     </button>
-                    <button type="button" id="btnToggleModoTexto" class="btn btn-secondary btn-sm" style="font-size: 0.8rem;">
+                    <button type="button" id="btnToggleModoTexto" class="btn btn-secondary btn-sm">
                         ✍️ Pegar Texto
                     </button>
-                    <label for="inputImagenOcr" style="margin: 0; font-size: 0.82rem; font-weight: 600; color: #334155;">Imagen:</label>
-                    <input type="file" name="imagenes" id="inputImagenOcr" accept="image/*" multiple class="form-control" style="max-width: 220px; font-size: 0.82rem; padding: 5px;" title="Puedes seleccionar varias imágenes al mismo tiempo">
-                    <button type="button" id="btnProcesarOcr" class="btn btn-primary" style="background: #4f46e5; border-color: #4f46e5; font-size: 0.88rem; display: flex; align-items: center; gap: 6px; font-weight: 600;">
+                    <label for="inputImagenOcr" style="margin: 0; font-size: 0.82rem; font-weight: 700; color: var(--text);">Imagen:</label>
+                    <input type="file" name="imagenes" id="inputImagenOcr" accept="image/*" multiple class="form-control" style="max-width: 210px; font-size: 0.8rem; padding: 6px;" title="Puedes seleccionar varias imágenes al mismo tiempo">
+                    <button type="button" id="btnProcesarOcr" class="btn btn-primary btn-sm" style="font-weight: 700;">
                         <span>✨</span> Procesar Caso
                     </button>
-                    <button type="button" id="btnDescargarExcelDirecto" class="btn btn-success btn-sm" style="background: #107c41; border-color: #107c41; color: white; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; padding: 7px 12px; border-radius: 6px;" title="Descargar Caso Completo en Hoja Única (Diario, Cuentas T y Estados Financieros)">
-                        <span>📊</span> Descargar Excel (Hoja Única)
+                    <button type="button" id="btnDescargarExcelDirecto" class="btn btn-excel btn-sm" title="Descargar Caso Completo en Hoja Única">
+                        <span>📊</span> Excel Hoja Única
                     </button>
                 </div>
             </div>
 
             <!-- Área de texto alternativa (oculta por defecto) -->
-            <div id="contenedorModoTexto" style="display: none; margin-top: 14px;">
-                <textarea id="inputTextoManual" class="form-control" rows="4" placeholder="Pega aquí el texto con las operaciones comerciales o dicta por voz (ej. 'El 01/08/2024 se crea una empresa con 80,000 en banco...')" style="font-size: 0.85rem;"></textarea>
+            <div id="contenedorModoTexto" style="display: none; margin-top: 16px;">
+                <textarea id="inputTextoManual" class="form-control" rows="4" placeholder="Pega aquí el enunciado del caso contable (ej. 'El 01/08/2024 se crea una empresa aportando 80,000 en banco y 20,000 en mercadería...')" style="font-size: 0.88rem;"></textarea>
             </div>
             
             <!-- Indicador de carga -->
-            <div id="ocrLoading" style="display: none; margin-top: 14px; padding: 10px 14px; background: rgba(255, 255, 255, 0.9); border-radius: 6px; font-size: 0.86rem; color: #4338ca; align-items: center; gap: 8px;">
+            <div id="ocrLoading" style="display: none; margin-top: 16px; padding: 12px 18px; background: #ffffff; border-radius: var(--radius-sm); font-size: 0.88rem; color: var(--accent); align-items: center; gap: 10px; border: 1px solid var(--border); box-shadow: var(--shadow-xs);">
                 <span id="ocrLoadingText">⏳ Analizando y resolviendo el caso con IA... Por favor espere.</span>
             </div>
 
             <!-- Selector de múltiples operaciones si la IA detectó más de una -->
-            <div id="selectorOperaciones" style="display: none; margin-top: 14px; padding: 14px; background: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+            <div id="selectorOperaciones" style="display: none; margin-top: 16px; padding: 16px; background: #ffffff; border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
                     <div>
-                        <span id="tituloCasoDetectado" style="font-size: 0.92rem; font-weight: 700; color: #1e293b; display: block;">
+                        <span id="tituloCasoDetectado" style="font-size: 0.95rem; font-weight: 800; color: var(--primary); display: block;">
                             📌 Operaciones resueltas por la IA:
                         </span>
-                        <span style="font-size: 0.78rem; color: #64748b;">
-                            Haz clic en una operación individual para cargarla en el formulario, guárdalas todas o descarga el Excel directo de este caso.
+                        <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                            Haz clic en una operación individual para cargarla en el formulario o guárdalas todas en la base de datos.
                         </span>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button type="button" id="btnGuardarTodasLote" class="btn btn-primary btn-sm" style="background: #2563eb; border-color: #2563eb; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
+                        <button type="button" id="btnGuardarTodasLote" class="btn btn-primary btn-sm">
                             <span>⚡</span> Guardar en BD
                         </button>
-                        <button type="button" id="btnDescargarExcelCaso" class="btn btn-success btn-sm" style="background: #107c41; border-color: #107c41; color: white; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;">
-                            <span>📊</span> Descargar Excel de este Caso (.xlsx)
+                        <button type="button" id="btnDescargarExcelCaso" class="btn btn-excel btn-sm">
+                            <span>📊</span> Descargar Excel (.xlsx)
                         </button>
                     </div>
                 </div>
                 <div id="listaOperacionesChips" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
             </div>
 
-            <div id="ocrResultado" hidden style="margin-top: 14px;">
-                <label for="ocrTextoDetectado" style="font-size: 0.82rem; font-weight: 600; color: #475569;">Texto detectado / enunciado del caso:</label>
-                <textarea id="ocrTextoDetectado" class="form-control" rows="6" readonly style="font-size: 0.85rem; font-family: monospace;"></textarea>
+            <div id="ocrResultado" hidden style="margin-top: 16px;">
+                <label for="ocrTextoDetectado" style="font-size: 0.82rem; font-weight: 700; color: var(--text);">Texto transcrito / Enunciado analizado:</label>
+                <textarea id="ocrTextoDetectado" class="form-control" rows="5" readonly style="font-size: 0.85rem; font-family: 'JetBrains Mono', monospace;"></textarea>
             </div>
 
             <!-- Feedback -->
-            <div id="ocrFeedback" role="status" aria-live="polite" style="display: none; margin-top: 12px; font-size: 0.85rem; padding: 10px 14px; border-radius: 6px;"></div>
+            <div id="ocrFeedback" role="status" aria-live="polite" style="display: none; margin-top: 14px;"></div>
         </div>
 
+        <!-- ═══ FORMULARIO PRINCIPAL DE REGISTRO ═══ -->
         <form method="post" id="formAsiento" action="{% url 'registrar_asiento' %}{% if propuesta_id %}?propuesta={{ propuesta_id }}{% endif %}">
             {% csrf_token %}
 
             <!-- Cabecera del asiento -->
             <div class="form-row">
                 <div class="form-group">
-                    <label for="id_fecha">📅 Fecha</label>
+                    <label for="id_fecha">📅 Fecha Contable</label>
                     <input type="date" name="fecha" id="id_fecha" class="form-control" value="{{ formulario_inicial.fecha }}" required>
-                    <small>Revise la fecha del hecho contable. Puede modificarla antes de guardar.</small>
+                    <small style="color: var(--text-secondary); font-size: 0.78rem; display: block; margin-top: 4px;">Revise y confirme la fecha de la operación comercial.</small>
                 </div>
                 <div class="form-group">
-                    <label for="id_descripcion">📝 Descripción (opcional)</label>
+                    <label for="id_descripcion">📝 Glosa / Descripción de la Operación</label>
                     <input type="text" name="descripcion" id="id_descripcion" class="form-control" value="{{ formulario_inicial.descripcion }}"
-                           placeholder="Ej: Registro de venta al contado...">
+                           placeholder="Ej: Por el aporte inicial de capital de los socios...">
                 </div>
             </div>
 
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+            <hr style="margin: 22px 0; border: none; border-top: 1px solid var(--border);">
 
             <!-- Líneas de movimiento -->
-            <p>Debe = Haber valida la estructura matemática, pero no garantiza que el tratamiento contable sea correcto.</p>
-            <h4 style="margin-bottom: 12px; color: var(--primary); font-size: 0.95rem;">
-                📊 Movimientos del Asiento
-            </h4>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                <h4 style="color: var(--primary); font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin: 0;">
+                    <span>📊</span> Movimientos en Partida Doble
+                </h4>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 500;">
+                    Cada asiento debe tener al menos dos líneas y cumplir: <strong>Total Debe = Total Haber</strong>
+                </span>
+            </div>
 
             <div id="movimientos-container">
                 <!-- Las filas se generan dinámicamente con JavaScript -->
             </div>
 
-            <div style="margin-top: 12px;">
+            <div style="margin-top: 14px;">
                 <button type="button" onclick="agregarMovimiento()" class="btn btn-secondary btn-sm">
-                    ➕ Agregar Línea
+                    ➕ Agregar Línea de Movimiento
                 </button>
             </div>
 
-            <!-- Preview del balance -->
+            <!-- Preview del balance / comprobación en vivo -->
             <div class="balance-preview" id="balancePreview">
                 <div class="balance-item">
                     <span class="balance-label">Total Debe:</span>
@@ -141,51 +150,63 @@
 
             <input type="hidden" name="num_movimientos" id="numMovimientos" value="0">
 
-            <div style="margin-top: 24px; display: flex; gap: 12px;">
-                <button type="submit" class="btn btn-success" id="btnGuardar">
-                    💾 Guardar Asiento
+            <div style="margin-top: 28px; display: flex; gap: 14px; flex-wrap: wrap;">
+                <button type="submit" class="btn btn-success" id="btnGuardar" style="padding: 12px 24px;">
+                    💾 Guardar Asiento Contable
                 </button>
-                <a href="{% url 'index' %}" class="btn btn-secondary">Cancelar</a>
+                <a href="{% url 'index' %}" class="btn btn-secondary" style="padding: 12px 20px;">Cancelar</a>
             </div>
         </form>
     </div>
 </div>
 
-<div class="card" style="margin-top: 24px;">
-    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin: 0;">📋 Asientos Ya Registrados</h3>
-        <button type="button" id="btnLimpiarCaso" class="btn btn-danger btn-sm" style="font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Borra todos los asientos actuales para empezar un caso nuevo limpio">
+<!-- ═══ HISTORIAL DE ASIENTOS REGISTRADOS ═══ -->
+<div class="card" style="margin-top: 28px;">
+    <div class="card-header">
+        <h3><span>📋</span> Asientos Registrados en el Período</h3>
+        <button type="button" id="btnLimpiarCaso" class="btn btn-danger btn-sm" title="Borra todos los asientos actuales para empezar un caso nuevo limpio">
             <span>🗑️</span> Nuevo Caso (Limpiar Libro)
         </button>
     </div>
     <div class="card-body" style="padding: 0;">
-        <table class="table" style="margin-bottom: 0;">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Descripción</th>
-                    <th># Movimientos</th>
-                    <th class="text-center" style="width: 180px;">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for asiento in asientos_registrados %}
-                <tr>
-                    <td>{{ asiento.fecha|date:"d/m/Y" }}</td>
-                    <td><strong>Asiento #{{ asiento.id }}</strong> - {{ asiento.descripcion|default:"Sin descripción" }}</td>
-                    <td>{{ asiento.movimientos.count }} líneas</td>
-                    <td class="text-center">
-                        <a href="{% url 'editar_asiento' asiento.id %}" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 0.85rem;">✏️ Editar</a>
-                        <a href="{% url 'eliminar_asiento' asiento.id %}" class="btn btn-danger btn-sm" style="padding: 4px 8px; font-size: 0.85rem;" onclick="return confirm('¿Eliminar este asiento permanentemente?');">🗑️ Eliminar</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="text-center" style="padding: 20px; color: #666;">No hay asientos registrados actualmente.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 120px;">Fecha</th>
+                        <th>Descripción / Glosa</th>
+                        <th style="width: 150px;">Líneas</th>
+                        <th class="text-center" style="width: 180px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asiento in asientos_registrados %}
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-secondary);">
+                            {{ asiento.fecha|date:"d/m/Y" }}
+                        </td>
+                        <td>
+                            <span class="asiento-id" style="margin-right: 6px;">#{{ asiento.id }}</span>
+                            <strong>{{ asiento.descripcion|default:"Sin descripción" }}</strong>
+                        </td>
+                        <td>
+                            <span class="badge badge-default">{{ asiento.movimientos.count }} movimientos</span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'editar_asiento' asiento.id %}" class="btn-edit" style="margin-right: 4px;">✏️ Editar</a>
+                            <a href="{% url 'eliminar_asiento' asiento.id %}" class="btn-delete" onclick="return confirm('¿Eliminar este asiento permanentemente?');">🗑️ Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center" style="padding: 32px; color: var(--text-muted);">
+                            No hay asientos registrados actualmente en este libro.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
@@ -202,7 +223,6 @@
 
     /**
      * Agrega una nueva fila de movimiento al formulario.
-     * Cada fila tiene: Cuenta (select), Tipo (Debe/Haber), Monto y botón eliminar.
      */
     function agregarMovimiento(cuentaId = '', tipo = '', monto = '') {
         const container = document.getElementById('movimientos-container');
@@ -216,15 +236,15 @@
             <div class="form-group">
                 ${idx === 0 ? '<label>Cuenta Contable</label>' : ''}
                 <select name="cuenta_${idx}" class="form-control" required>
-                    <option value="">Seleccionar cuenta</option>
+                    <option value="">Seleccionar cuenta contable</option>
                 </select>
             </div>
             <div class="form-group">
-                ${idx === 0 ? '<label>Tipo</label>' : ''}
+                ${idx === 0 ? '<label>Efecto</label>' : ''}
                 <select name="tipo_${idx}" class="form-control" required onchange="actualizarBalance()">
-                    <option value="">— Tipo —</option>
-                    <option value="debe">Debe</option>
-                    <option value="haber">Haber</option>
+                    <option value="">— Seleccionar —</option>
+                    <option value="debe">Debe (Cargo)</option>
+                    <option value="haber">Haber (Abono)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -269,14 +289,12 @@
 
     /**
      * Recalcula los totales de Debe y Haber en tiempo real
-     * y actualiza el indicador de estado del balance.
      */
     function actualizarBalance() {
         let totalDebe = 0;
         let totalHaber = 0;
 
         const rows = document.querySelectorAll('.movimiento-row');
-        let validCount = 0;
 
         rows.forEach((row, i) => {
             const tipo = row.querySelector(`select[name^="tipo_"]`);
@@ -286,7 +304,6 @@
                 const val = parseFloat(monto.value) || 0;
                 if (tipo.value === 'debe') totalDebe += val;
                 else if (tipo.value === 'haber') totalHaber += val;
-                validCount++;
             }
         });
 
@@ -310,11 +327,11 @@
             status.textContent = '—';
             status.className = 'balance-status';
         } else if (Math.abs(totalDebe - totalHaber) < 0.005) {
-            status.textContent = '✅ Balanceado';
+            status.textContent = '✅ Cuadrado';
             status.className = 'balance-status ok';
         } else {
             const diff = Math.abs(totalDebe - totalHaber).toFixed(2);
-            status.textContent = `❌ Diferencia: S/ ${diff}`;
+            status.textContent = `❌ Descuadre: S/ ${diff}`;
             status.className = 'balance-status error';
         }
     }

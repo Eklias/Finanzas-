@@ -1,8 +1,8 @@
 @echo off
-title Sistema Contable ContaSys - FIIS UNI
+title Sistema Finanzas - FIIS UNI
 color 0B
 echo ========================================================
-echo         SISTEMA CONTABLE CONTASYS - FIIS UNI
+echo         SISTEMA FINANZAS - FIIS UNI
 echo ========================================================
 echo.
 echo 1. Accediendo al directorio del proyecto...

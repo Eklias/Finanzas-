@@ -5,67 +5,272 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sistema Contable - Gestión de asientos contables y reportes financieros">
-    <title>{% block title %}Sistema Contable{% endblock %}</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta name="description" content="Finanzas — Sistema Contable y Gestión Financiera para FIIS UNI">
+    <title>{% block title %}Sistema Contable{% endblock %} — Finanzas</title>
+
+    <!-- Google Fonts Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Hoja de Estilos Principal con Cache Buster -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20261007_v8">
+
+    <!-- Estilos Críticos Inmediatos de Sidebar Jet Black (Garantía Visual Anti-Caché) -->
+    <style>
+        .sidebar {
+            background: #000000 !important;
+            background-color: #000000 !important;
+            border-right: 1px solid #18181b !important;
+            color: #f4f4f5 !important;
+        }
+        .sidebar svg,
+        .sidebar .nav-svg,
+        .sidebar svg.nav-svg,
+        .brand-emblem svg {
+            width: 18px !important;
+            height: 18px !important;
+            min-width: 18px !important;
+            min-height: 18px !important;
+            max-width: 18px !important;
+            max-height: 18px !important;
+            flex-shrink: 0 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        .brand-emblem {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            min-height: 36px !important;
+            background: #18181b !important;
+            border: 1px solid #27272a !important;
+            border-radius: 10px !important;
+        }
+        .brand-emblem svg {
+            color: #10b981 !important;
+            stroke: #10b981 !important;
+        }
+        .sidebar-brand {
+            background: #000000 !important;
+            border-bottom: 1px solid #18181b !important;
+        }
+        .sidebar-nav {
+            background: #000000 !important;
+        }
+        .nav-section {
+            color: #52525b !important;
+        }
+        .nav-link {
+            color: #a1a1aa !important;
+            background: transparent !important;
+            border: 1px solid transparent !important;
+            border-radius: 8px !important;
+        }
+        .nav-link:hover {
+            color: #ffffff !important;
+            background: #18181b !important;
+            border-color: #27272a !important;
+        }
+        .nav-link.active {
+            background: #18181b !important;
+            color: #ffffff !important;
+            border-color: #27272a !important;
+            position: relative !important;
+        }
+        .nav-link.active::before {
+            content: '' !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 6px !important;
+            bottom: 6px !important;
+            width: 3px !important;
+            background: #10b981 !important;
+            border-radius: 0 4px 4px 0 !important;
+        }
+        .nav-link.active .nav-svg {
+            color: #10b981 !important;
+            stroke: #10b981 !important;
+        }
+        .nav-link .nav-svg {
+            color: #71717a !important;
+            stroke: #71717a !important;
+        }
+        .nav-link:hover .nav-svg {
+            color: #ffffff !important;
+            stroke: #ffffff !important;
+        }
+        .sidebar-footer {
+            background: #000000 !important;
+            border-top: 1px solid #18181b !important;
+        }
+        /* Ajuste Cuentas T Anti-Corte */
+        .tcuentas-grid {
+            grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)) !important;
+            gap: 22px !important;
+        }
+        .tcuenta-body {
+            overflow-x: auto !important;
+            width: 100% !important;
+        }
+        .tcuenta-table {
+            width: 100% !important;
+            min-width: 440px !important;
+            table-layout: fixed !important;
+        }
+        .tcuenta-table th,
+        .tcuenta-table td {
+            white-space: nowrap !important;
+            box-sizing: border-box !important;
+        }
+        .tcuenta-monto {
+            padding-right: 8px !important;
+            text-align: right !important;
+        }
+        .tcuenta-totals td {
+            padding-right: 12px !important;
+            white-space: nowrap !important;
+        }
+    </style>
 </head>
 <body>
+    <!-- Overlay móvil -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+
     <div class="layout">
-        <!-- ═══ SIDEBAR ═══ -->
-        <aside class="sidebar">
+        <!-- ═══ SIDEBAR JET BLACK MINIMALISTA ═══ -->
+        <aside id="sidebar" class="sidebar">
             <div class="sidebar-brand">
-                <h1><span class="brand-icon">📊</span> ContaSys</h1>
-                <small>Sistema Contable v1.0</small>
+                <div class="brand-emblem">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                        <polyline points="2 17 12 22 22 17"/>
+                        <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                </div>
+                <div class="brand-info">
+                    <h1>
+                        Finanzas
+                    </h1>
+                    <small>UNI FIIS • GE-605</small>
+                </div>
             </div>
+
             <nav class="sidebar-nav">
                 <div class="nav-section">Principal</div>
                 <a href="{% url 'index' %}" class="nav-link {% block nav_index %}{% endblock %}">
-                    <span class="nav-icon">🏠</span> Inicio
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <span>Inicio</span>
                 </a>
 
                 <div class="nav-section">Operaciones</div>
                 <a href="{% url 'gestionar_cuentas' %}" class="nav-link {% block nav_cuentas %}{% endblock %}">
-                    <span class="nav-icon">📋</span> Plan de Cuentas
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    <span>Plan de Cuentas</span>
                 </a>
                 <a href="{% url 'registrar_asiento' %}" class="nav-link {% block nav_registrar %}{% endblock %}">
-                    <span class="nav-icon">✏️</span> Registrar Asiento
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    <span>Registrar Asiento</span>
                 </a>
 
-                <div class="nav-section">Reportes</div>
+                <div class="nav-section">Estados & Libros</div>
                 <a href="{% url 'libro_diario' %}" class="nav-link {% block nav_diario %}{% endblock %}">
-                    <span class="nav-icon">📖</span> Libro Diario
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <span>Libro Diario</span>
                 </a>
                 <a href="{% url 'libro_mayor' %}" class="nav-link {% block nav_mayor %}{% endblock %}">
-                    <span class="nav-icon">📚</span> Libro Mayor
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="12" y1="3" x2="12" y2="21"/>
+                        <line x1="3" y1="9" x2="21" y2="9"/>
+                    </svg>
+                    <span>Libro Mayor (T)</span>
                 </a>
                 <a href="{% url 'balance_comprobacion' %}" class="nav-link {% block nav_balance_comp %}{% endblock %}">
-                    <span class="nav-icon">⚖️</span> Balance de Comprobación
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="m4.93 4.93 4.24 4.24"/>
+                        <path d="m14.83 9.17 4.24-4.24"/>
+                        <path d="m14.83 14.83 4.24 4.24"/>
+                        <path d="m9.17 14.83-4.24 4.24"/>
+                    </svg>
+                    <span>Bal. Comprobación</span>
                 </a>
                 <a href="{% url 'estado_resultados' %}" class="nav-link {% block nav_eerr %}{% endblock %}">
-                    <span class="nav-icon">📈</span> Estado de Resultados
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                        <polyline points="17 6 23 6 23 12"/>
+                    </svg>
+                    <span>Estado Resultados</span>
                 </a>
                 <a href="{% url 'balance_general' %}" class="nav-link {% block nav_balance_gen %}{% endblock %}">
-                    <span class="nav-icon">🏦</span> Balance General
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <line x1="3" y1="21" x2="21" y2="21"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                        <polyline points="5 6 12 3 19 6"/>
+                        <line x1="4" y1="10" x2="4" y2="21"/>
+                        <line x1="20" y1="10" x2="20" y2="21"/>
+                        <line x1="8" y1="14" x2="8" y2="17"/>
+                        <line x1="12" y1="14" x2="12" y2="17"/>
+                        <line x1="16" y1="14" x2="16" y2="17"/>
+                    </svg>
+                    <span>Balance General</span>
                 </a>
 
-                <div class="nav-section" style="margin-top: 20px;">Descargas</div>
-                <a href="{% url 'reporte_completo' %}" class="nav-link {% block nav_reporte %}{% endblock %}" style="background-color: #217346; color: white;">
-                    <span class="nav-icon">📥</span> Descargas (PDF / Excel / CSV)
+                <div class="nav-section">Exportación</div>
+                <a href="{% url 'reporte_completo' %}" class="nav-link nav-link-export {% block nav_reporte %}{% endblock %}">
+                    <svg class="nav-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span>Centro de Descargas</span>
                 </a>
             </nav>
-        </aside>
 
-        <!-- ═══ MAIN CONTENT ═══ -->
-        <main class="main-content">
-            <div class="page-header">
-                <div>
-                    <h2>{% block page_title %}Sistema Contable{% endblock %}</h2>
-                    <div class="header-subtitle">{% block page_subtitle %}{% endblock %}</div>
-                </div>
-                <div>
-                    {% block page_actions %}{% endblock %}
+            <div class="sidebar-footer">
+                <div class="sidebar-status-box">
+                    <span class="status-dot"></span>
+                    <div class="status-text">
+                        <strong>Sistema Operativo</strong>
+                        <span>FIIS UNI • Ejercicio 2026</span>
+                    </div>
                 </div>
             </div>
+        </aside>
+
+        <!-- ═══ CONTENIDO PRINCIPAL ═══ -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="page-header-left">
+                    <button type="button" class="mobile-menu-btn" onclick="toggleSidebar(true)" aria-label="Abrir menú">
+                        ☰
+                    </button>
+                    <div>
+                        <h2>{% block page_title %}Sistema Contable{% endblock %}</h2>
+                        <div class="header-subtitle">{% block page_subtitle %}{% endblock %}</div>
+                    </div>
+                </div>
+                <div class="page-header-actions">
+                    {% block page_actions %}{% endblock %}
+                </div>
+            </header>
 
             <div class="content-area">
                 <!-- Mensajes del sistema -->
@@ -73,7 +278,7 @@
                     {% for message in messages %}
                         <div class="alert alert-{{ message.tags }}">
                             {% if message.tags == 'success' %}✅{% elif message.tags == 'error' %}❌{% elif message.tags == 'warning' %}⚠️{% else %}ℹ️{% endif %}
-                            {{ message }}
+                            <span>{{ message }}</span>
                         </div>
                     {% endfor %}
                 {% endif %}
@@ -81,33 +286,49 @@
                 {% block content %}{% endblock %}
             </div>
 
-            <div class="footer">
-                <p>© 2026 ContaSys — Sistema Contable | Desarrollado con Django & SQLite</p>
-            </div>
+            <footer class="footer">
+                <p>© 2026 <strong>Finanzas</strong> — Sistema de Información y Gestión Financiera | Facultad de Ingeniería Industrial y de Sistemas (FIIS UNI)</p>
+            </footer>
         </main>
     </div>
 
-    <!-- ═══ CHATBOT FLOTANTE ═══ -->
+    <!-- ═══ CHATBOT FLOTANTE "CONTA AI" ═══ -->
     <div id="chatbot-container" class="chatbot-container" data-url="{% url 'chatbot_api' %}">
         <div hidden>{% csrf_token %}</div>
-        <button type="button" id="chatbot-toggle" class="chatbot-toggle" aria-label="Abrir asistente contable" aria-expanded="false" aria-controls="chatbot-window">🤖</button>
+        <button type="button" id="chatbot-toggle" class="chatbot-toggle" aria-label="Abrir asistente contable" aria-expanded="false" aria-controls="chatbot-window">
+            🤖
+        </button>
         <section id="chatbot-window" class="chatbot-window" aria-label="Asistente contable" hidden>
             <div class="chatbot-header">
-                <span>Asistente Contable "Conta"</span>
+                <span>Asistente Conta AI</span>
                 <button type="button" id="chatbot-close" aria-label="Cerrar chat">×</button>
             </div>
             <div id="chatbot-messages" class="chatbot-messages" role="log" aria-live="polite" aria-relevant="additions text">
-                <div class="chatbot-message chatbot-message-bot">¡Hola! Soy Conta. Describe un hecho contable y te ayudaré a preparar un asiento para revisar.</div>
+                <div class="chatbot-message chatbot-message-bot">¡Hola! Soy <strong>Conta AI</strong>. Describe una transacción u operación comercial y te estructuraré el asiento contable en partida doble para revisión.</div>
             </div>
             <form id="chatbot-form" class="chatbot-input-row">
                 <label class="chatbot-sr-only" for="chatbot-input">Hecho contable</label>
-                <input type="text" id="chatbot-input" placeholder="Describe un hecho contable..." autocomplete="off" required>
+                <input type="text" id="chatbot-input" placeholder="Ej. Se compra mercadería por S/ 5,000 al contado..." autocomplete="off" required>
                 <button type="submit" id="chatbot-send" class="btn btn-primary" aria-label="Enviar mensaje">➤</button>
             </form>
         </section>
     </div>
-    <script src="{% static 'js/chatbot.js' %}" defer></script>
 
+    <!-- Scripts -->
+    <script>
+        function toggleSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (open) {
+                sidebar.classList.add('open');
+                overlay.classList.add('active');
+            } else {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            }
+        }
+    </script>
+    <script src="{% static 'js/chatbot.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

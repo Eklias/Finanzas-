@@ -928,7 +928,7 @@ def procesar_imagen_asiento(request):
             "   - Donación recibida: 20 Mercaderías al 'debe' / 75 Otros Ingresos al 'haber'.\n"
             "5. AUTO-VERIFICACIÓN DE PARTIDA DOBLE Y CATÁLOGO:\n"
             "   - Antes de emitir el JSON, auto-verifica que cada operación cumpla estrictamente suma(debe) == suma(haber).\n"
-            "   - Usa ÚNICAMENTE cuentas del catálogo oficial provisto como strings. No inventes códigos ni nombres.\n"
+            "   - Usa ÚNICAMENTE códigos existentes en el catálogo real provisto como strings. No inventes códigos ni nombres que no existan en este catálogo. Si alguna cuenta no se puede determinar con total seguridad, márcala con pendiente_revision: true.\n"
             "6. Devuelve ÚNICAMENTE el objeto JSON sin explicaciones adicionales ni código markdown.\n\n"
             "Catálogo real de cuentas (JSON):\n" + json.dumps(catalogo, ensure_ascii=False)
         )
@@ -1175,6 +1175,20 @@ def limpiar_asientos_caso(request):
         })
     except Exception as e:
         return JsonResponse({'error': f'Error al limpiar asientos: {str(e)}'}, status=500)
+
+
+def cargar_datos_ejemplo(request):
+    """
+    Restaura los datos de prueba del caso práctico contable.
+    """
+    from django.core.management import call_command
+    try:
+        call_command('cargar_prueba')
+        messages.success(request, 'Datos de ejemplo del caso contable cargados exitosamente (Periodo 2026).')
+    except Exception as e:
+        messages.error(request, f'Error al cargar datos de ejemplo: {str(e)}')
+    return redirect('index')
+
 
 
 

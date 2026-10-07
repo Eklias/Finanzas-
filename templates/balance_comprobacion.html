@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
 {% load contable_tags %}
 
-{% block title %}Balance de Comprobación — ContaSys{% endblock %}
+{% block title %}Balance de Comprobación — Finanzas{% endblock %}
 {% block nav_balance_comp %}active{% endblock %}
 {% block page_title %}⚖️ Balance de Comprobación{% endblock %}
-{% block page_subtitle %}Verificación de cuadre entre totales de Debe y Haber{% endblock %}
+{% block page_subtitle %}Hoja de trabajo contable: Sumas de Mayor y verificación de Saldos Cuadrados{% endblock %}
 
 {% block page_actions %}
-<a href="{% url 'exportar_reporte' 'balance-comprobacion' 'excel' %}" class="btn btn-sm" style="background:#217346; color:white; font-weight:600; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">📊 Exportar Excel</a>
-<a href="{% url 'exportar_reporte' 'balance-comprobacion' 'csv' %}" class="btn btn-sm" style="background:#475569; color:white; font-weight:600; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">📄 Exportar CSV</a>
+<a href="{% url 'exportar_reporte' 'balance-comprobacion' 'excel' %}" class="btn btn-sm btn-excel">
+    <span>📊</span> Exportar Excel
+</a>
+<a href="{% url 'exportar_reporte' 'balance-comprobacion' 'csv' %}" class="btn btn-sm btn-secondary">
+    <span>📄</span> Exportar CSV
+</a>
 {% endblock %}
 
 {% block content %}
@@ -19,36 +23,40 @@
             <table>
                 <thead>
                     <tr>
-                        <th rowspan="2" style="vertical-align: middle;">Código</th>
-                        <th rowspan="2" style="vertical-align: middle;">Cuenta</th>
-                        <th colspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.2);">Sumas</th>
-                        <th colspan="2" class="text-center" style="border-bottom: 1px solid rgba(255,255,255,0.2);">Saldos</th>
+                        <th rowspan="2" style="vertical-align: middle; width: 100px;">Código</th>
+                        <th rowspan="2" style="vertical-align: middle;">Cuenta Contable</th>
+                        <th colspan="2" class="text-center" style="border-bottom: 1px solid var(--border); background: #f1f5f9;">Sumas del Mayor</th>
+                        <th colspan="2" class="text-center" style="border-bottom: 1px solid var(--border); background: #f1f5f9;">Saldos Determinados</th>
                     </tr>
                     <tr>
-                        <th class="text-right">Debe</th>
-                        <th class="text-right">Haber</th>
-                        <th class="text-right">Deudor</th>
-                        <th class="text-right">Acreedor</th>
+                        <th class="text-right" style="width: 140px; background: #fff1f2; color: #be123c;">Debe</th>
+                        <th class="text-right" style="width: 140px; background: #ecfdf5; color: #047857;">Haber</th>
+                        <th class="text-right" style="width: 140px; background: #fff1f2; color: #be123c;">Deudor</th>
+                        <th class="text-right" style="width: 140px; background: #ecfdf5; color: #047857;">Acreedor</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for d in datos %}
                     <tr>
-                        <td><strong>{{ d.cuenta.codigo }}</strong></td>
+                        <td><span class="cuentas-code">{{ d.cuenta.codigo }}</span></td>
                         <td>
-                            {{ d.cuenta.nombre }}
-                            <span class="badge {{ d.cuenta.tipo|tipo_badge }}">{{ d.cuenta.get_tipo_display }}</span>
+                            <strong style="color: var(--text);">{{ d.cuenta.nombre }}</strong>
+                            <span class="badge {{ d.cuenta.tipo|tipo_badge }}" style="margin-left: 8px;">{{ d.cuenta.get_tipo_display }}</span>
                         </td>
                         <td class="text-right monto">{{ d.total_debe|formato_moneda }}</td>
                         <td class="text-right monto">{{ d.total_haber|formato_moneda }}</td>
                         <td class="text-right monto">
                             {% if d.saldo_deudor %}
                                 <span class="text-debe">{{ d.saldo_deudor|formato_moneda }}</span>
+                            {% else %}
+                                <span style="color: var(--text-muted);">—</span>
                             {% endif %}
                         </td>
                         <td class="text-right monto">
                             {% if d.saldo_acreedor %}
                                 <span class="text-haber">{{ d.saldo_acreedor|formato_moneda }}</span>
+                            {% else %}
+                                <span style="color: var(--text-muted);">—</span>
                             {% endif %}
                         </td>
                     </tr>
@@ -56,7 +64,7 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="2">TOTALES</th>
+                        <th colspan="2">TOTALES CONSOLIDADOS</th>
                         <th class="text-right monto">{{ gran_total_debe|formato_moneda }}</th>
                         <th class="text-right monto">{{ gran_total_haber|formato_moneda }}</th>
                         <th class="text-right monto">{{ gran_saldo_deudor|formato_moneda }}</th>
@@ -68,12 +76,24 @@
     </div>
 </div>
 
-<!-- Indicador de cuadre -->
+<!-- Indicador de Cuadre Contable -->
 <div class="balance-check {% if esta_cuadrado %}balanced{% else %}unbalanced{% endif %}">
     {% if esta_cuadrado %}
-        ✅ <strong>Balance cuadrado:</strong> Los totales de Debe ({{ gran_total_debe|formato_moneda }}) y Haber ({{ gran_total_haber|formato_moneda }}) coinciden correctamente.
+        <div style="font-size: 1.6rem; line-height: 1;">✅</div>
+        <div>
+            <strong style="font-size: 1rem; display: block;">Balance de Comprobación Perfectamente Cuadrado</strong>
+            <span style="font-size: 0.86rem; font-weight: 500;">
+                Tanto la suma de movimientos (Debe: {{ gran_total_debe|formato_moneda }} / Haber: {{ gran_total_haber|formato_moneda }}) como los saldos finales (Deudor: {{ gran_saldo_deudor|formato_moneda }} / Acreedor: {{ gran_saldo_acreedor|formato_moneda }}) están en equilibrio estricto.
+            </span>
+        </div>
     {% else %}
-        ❌ <strong>Balance descuadrado:</strong> Los totales de Debe ({{ gran_total_debe|formato_moneda }}) y Haber ({{ gran_total_haber|formato_moneda }}) no coinciden.
+        <div style="font-size: 1.6rem; line-height: 1;">❌</div>
+        <div>
+            <strong style="font-size: 1rem; display: block;">Descuadre Detectado en el Balance de Comprobación</strong>
+            <span style="font-size: 0.86rem; font-weight: 500;">
+                Los totales del Debe ({{ gran_total_debe|formato_moneda }}) y Haber ({{ gran_total_haber|formato_moneda }}) no coinciden. Por favor revise los asientos registrados.
+            </span>
+        </div>
     {% endif %}
 </div>
 {% else %}
@@ -81,8 +101,13 @@
     <div class="card-body">
         <div class="empty-state">
             <div class="empty-icon">⚖️</div>
-            <h4>Sin datos para el balance</h4>
-            <p>Registre asientos contables para generar el balance de comprobación</p>
+            <h4>Sin datos para generar el Balance de Comprobación</h4>
+            <p>Registre asientos contables para construir la hoja de trabajo con sumas del mayor y saldos.</p>
+            <div style="margin-top: 20px;">
+                <a href="{% url 'registrar_asiento' %}" class="btn btn-primary">
+                    <span>✏️</span> Registrar Asiento
+                </a>
+            </div>
         </div>
     </div>
 </div>

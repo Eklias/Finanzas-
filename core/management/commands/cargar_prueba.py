@@ -1,7 +1,7 @@
 """
-Comando de gestión para cargar datos de prueba.
+Comando de gestión para cargar datos de prueba del ciclo contable.
 
-Simula las operaciones de la empresa "AMD Tech Perú S.A.C." con las
+Simula las operaciones de un caso práctico contable con las
 siguientes transacciones de octubre 2026:
 
 1. Capital inicial: S/ 80,000 (50,000 efectivo + 30,000 equipos)
@@ -22,7 +22,7 @@ from datetime import date
 
 
 class Command(BaseCommand):
-    help = 'Carga datos de prueba: empresa AMD Tech Perú S.A.C.'
+    help = 'Carga datos de prueba: caso práctico contable'
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.WARNING('Eliminando datos existentes...'))
@@ -128,7 +128,7 @@ class Command(BaseCommand):
         # --- RESUMEN ---
         self.stdout.write(self.style.SUCCESS(
             f'\n=== DATOS CARGADOS EXITOSAMENTE ===\n'
-            f'  Empresa: AMD Tech Peru S.A.C.\n'
+            f'  Caso: Caso Practico Contable (Octubre 2026)\n'
             f'  Cuentas creadas: {CuentaContable.objects.count()}\n'
             f'  Asientos registrados: {AsientoContable.objects.count()}\n'
             f'  Movimientos creados: {Movimiento.objects.count()}\n'

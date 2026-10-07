@@ -1,10 +1,19 @@
 {% extends 'base.html' %}
 {% load contable_tags %}
 
-{% block title %}Libro Mayor — ContaSys{% endblock %}
+{% block title %}Libro Mayor — Finanzas{% endblock %}
 {% block nav_mayor %}active{% endblock %}
-{% block page_title %}📚 Libro Mayor{% endblock %}
-{% block page_subtitle %}Cuentas T — Movimientos agrupados por cuenta contable{% endblock %}
+{% block page_title %}📚 Libro Mayor (Cuentas T){% endblock %}
+{% block page_subtitle %}Agrupación de movimientos por cuenta contable y determinación de saldos deudores / acreedores{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'exportar_reporte' 'completo' 'excel' %}" class="btn btn-sm btn-excel">
+    <span>📊</span> Exportar Excel
+</a>
+<a href="{% url 'reporte_completo' %}" class="btn btn-sm btn-primary">
+    <span>📥</span> Reporte PDF
+</a>
+{% endblock %}
 
 {% block content %}
 {% if datos_cuentas %}
@@ -12,15 +21,25 @@
     {% for dato in datos_cuentas %}
         <div class="tcuenta-card">
             <div class="tcuenta-header">
-                <strong>{{ dato.cuenta.codigo }}</strong>&nbsp;&nbsp;{{ dato.cuenta.nombre|upper }}
+                <strong>{{ dato.cuenta.codigo }}</strong>
+                <span>{{ dato.cuenta.nombre|upper }}</span>
+                <span class="badge {{ dato.cuenta.tipo|tipo_badge }}" style="margin-left: auto;">{{ dato.cuenta.get_tipo_display }}</span>
             </div>
 
             <div class="tcuenta-body">
                 <table class="tcuenta-table">
+                    <colgroup>
+                        <col style="width: 19%;">
+                        <col style="width: 11%;">
+                        <col style="width: 20%;">
+                        <col style="width: 19%;">
+                        <col style="width: 11%;">
+                        <col style="width: 20%;">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th colspan="3" class="text-center tcuenta-th-debe">DEBE</th>
-                            <th colspan="3" class="text-center tcuenta-th-haber">HABER</th>
+                            <th colspan="3" class="text-center tcuenta-th-debe">DEBE (CARGOS)</th>
+                            <th colspan="3" class="text-center tcuenta-th-haber">HABER (ABONOS)</th>
                         </tr>
                         <tr class="tcuenta-subheader">
                             <th class="text-center">Fecha</th>
@@ -37,7 +56,7 @@
                             {% if mov.tipo == 'debe' %}
                                 <td class="tcuenta-fecha text-center">{{ mov.asiento.fecha|date:"d/m/y" }}</td>
                                 <td class="tcuenta-num text-center">#{{ mov.asiento.id }}</td>
-                                <td class="tcuenta-monto text-right">{{ mov.monto|formato_moneda }}</td>
+                                <td class="tcuenta-monto text-right text-debe monto">{{ mov.monto|formato_moneda }}</td>
                                 <td class="tcuenta-fecha"></td>
                                 <td class="tcuenta-num"></td>
                                 <td class="tcuenta-monto text-right"></td>
@@ -47,7 +66,7 @@
                                 <td class="tcuenta-monto text-right"></td>
                                 <td class="tcuenta-fecha text-center">{{ mov.asiento.fecha|date:"d/m/y" }}</td>
                                 <td class="tcuenta-num text-center">#{{ mov.asiento.id }}</td>
-                                <td class="tcuenta-monto text-right">{{ mov.monto|formato_moneda }}</td>
+                                <td class="tcuenta-monto text-right text-haber monto">{{ mov.monto|formato_moneda }}</td>
                             {% endif %}
                         </tr>
                         {% endfor %}
@@ -60,11 +79,15 @@
                         <tr class="tcuenta-saldo">
                             <td colspan="6" class="text-center">
                                 {% if dato.cuenta.naturaleza_deudora %}
-                                    <strong>SALDO DEUDOR</strong>&nbsp;&nbsp;&nbsp;
+                                    <span class="badge badge-debe" style="font-size: 0.8rem; padding: 4px 12px; margin-right: 8px;">
+                                        SALDO DEUDOR
+                                    </span>
                                 {% else %}
-                                    <strong>SALDO ACREEDOR</strong>&nbsp;&nbsp;&nbsp;
+                                    <span class="badge badge-haber" style="font-size: 0.8rem; padding: 4px 12px; margin-right: 8px;">
+                                        SALDO ACREEDOR
+                                    </span>
                                 {% endif %}
-                                <span class="monto" style="font-size: 1rem;">{{ dato.saldo|formato_moneda }}</span>
+                                <span class="monto" style="font-size: 1.05rem; font-weight: 800;">{{ dato.saldo|formato_moneda }}</span>
                             </td>
                         </tr>
                     </tfoot>
@@ -78,118 +101,15 @@
         <div class="card-body">
             <div class="empty-state">
                 <div class="empty-icon">📚</div>
-                <h4>No hay movimientos registrados</h4>
-                <p>Los movimientos aparecerán aquí cuando registre asientos contables</p>
+                <h4>No hay movimientos mayorizados</h4>
+                <p>Las Cuentas T se generarán automáticamente a medida que registre asientos contables en el sistema.</p>
+                <div style="margin-top: 20px;">
+                    <a href="{% url 'registrar_asiento' %}" class="btn btn-primary">
+                        <span>✏️</span> Registrar Asiento Contable
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 {% endif %}
-
-<style>
-    /* Grid de cuentas T */
-    .tcuentas-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); /* Un poco más ancho para que entren las fechas */
-        gap: 20px;
-    }
-
-    .tcuenta-card {
-        background: var(--bg-card);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        border: 1px solid var(--border);
-        overflow: hidden;
-        transition: var(--transition);
-    }
-    .tcuenta-card:hover {
-        box-shadow: var(--shadow-md);
-    }
-
-    .tcuenta-header {
-        padding: 10px 16px;
-        background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
-        border-bottom: 2px solid var(--primary);
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--primary);
-        text-align: center;
-    }
-
-    .tcuenta-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.85rem;
-    }
-
-    .tcuenta-th-debe,
-    .tcuenta-th-haber {
-        padding: 8px;
-        font-weight: 700;
-        font-size: 0.9rem;
-    }
-    .tcuenta-th-debe {
-        background: #fff5f5;
-        color: #c53030;
-        border-right: 2px solid var(--primary);
-    }
-    .tcuenta-th-haber {
-        background: #f0fff4;
-        color: #276749;
-    }
-
-    .tcuenta-subheader th {
-        font-size: 0.75rem;
-        color: #718096;
-        background-color: #f8fafc;
-        padding: 4px 8px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .tcuenta-subheader th:nth-child(3) {
-        border-right: 2px solid var(--primary);
-    }
-
-    .tcuenta-table tbody td {
-        padding: 6px 8px;
-        border-bottom: 1px solid #f0f4f8;
-    }
-    .tcuenta-table tbody td:nth-child(3) {
-        border-right: 2px solid var(--primary);
-    }
-
-    .tcuenta-fecha {
-        width: 65px;
-        font-size: 0.75rem;
-        color: #4a5568;
-    }
-    
-    .tcuenta-num {
-        width: 40px;
-        font-size: 0.75rem;
-        color: var(--text-light);
-    }
-    
-    .tcuenta-monto {
-        font-variant-numeric: tabular-nums;
-        font-weight: 500;
-    }
-
-    .tcuenta-totals td {
-        padding: 8px 10px !important;
-        border-top: 2px solid #cbd5e0 !important;
-        background: #f7fafc;
-        font-weight: 700;
-    }
-    .tcuenta-totals td:nth-child(1) {
-        border-right: 2px solid var(--primary) !important;
-    }
-
-    .tcuenta-saldo td {
-        padding: 10px !important;
-        background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
-        color: var(--primary);
-        font-weight: 600;
-        font-size: 0.88rem;
-    }
-</style>
 {% endblock %}

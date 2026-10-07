@@ -1,6 +1,6 @@
 """
 Utilidades para exportación de reportes a Excel (.xlsx) y CSV.
-Desarrollado para el Sistema Contable ContaSys - FIIS UNI.
+Desarrollado para el Sistema de Información y Gestión Financiera (Finanzas) - FIIS UNI.
 """
 import csv
 import io
@@ -57,7 +57,7 @@ def build_excel_diario(wb, title_sheet="Libro Diario"):
     ws = wb.active if "Sheet" in wb.sheetnames else wb.create_sheet(title=title_sheet)
     ws.title = title_sheet
 
-    ws.append(["SISTEMA CONTABLE CONTASYS - LIBRO DIARIO"])
+    ws.append(["SISTEMA FINANZAS - LIBRO DIARIO"])
     ws.append(["Registro cronológico de operaciones contables"])
     ws.append([])
 
@@ -137,7 +137,7 @@ def build_excel_balance_comprobacion(wb, title_sheet="Balance Comprobación"):
     if ws.title != title_sheet:
         ws = wb.create_sheet(title=title_sheet)
 
-    ws.append(["SISTEMA CONTABLE CONTASYS - BALANCE DE COMPROBACIÓN"])
+    ws.append(["SISTEMA FINANZAS - BALANCE DE COMPROBACIÓN"])
     ws.append(["Sumas del Mayor y Saldos de Cuentas"])
     ws.append([])
 
@@ -216,7 +216,7 @@ def build_excel_balance_comprobacion(wb, title_sheet="Balance Comprobación"):
 
 def build_excel_estado_resultados(wb, title_sheet="Estado de Resultados"):
     ws = wb.create_sheet(title=title_sheet)
-    ws.append(["SISTEMA CONTABLE CONTASYS - ESTADO DE RESULTADOS"])
+    ws.append(["SISTEMA FINANZAS - ESTADO DE RESULTADOS"])
     ws.append(["Estado Financiero de Rendimiento Económico"])
     ws.append([])
 
@@ -275,7 +275,7 @@ def build_excel_estado_resultados(wb, title_sheet="Estado de Resultados"):
 
 def build_excel_balance_general(wb, title_sheet="Balance General"):
     ws = wb.create_sheet(title=title_sheet)
-    ws.append(["SISTEMA CONTABLE CONTASYS - BALANCE GENERAL"])
+    ws.append(["SISTEMA FINANZAS - BALANCE GENERAL"])
     ws.append(["Estado de Situación Financiera"])
     ws.append([])
 
